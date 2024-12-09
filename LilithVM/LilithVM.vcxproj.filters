@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="vm">
+      <UniqueIdentifier>{57a01b16-431f-434c-ab19-179ef1edaaef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bytecode">
+      <UniqueIdentifier>{52ef3a7b-44a7-46f3-bc07-25a23d85d8da}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source.cpp" />
+  </ItemGroup>
+</Project>
