@@ -24,5 +24,8 @@
     <ClInclude Include="vm\Logger.h">
       <Filter>vm</Filter>
     </ClInclude>
+    <ClInclude Include="vm\LilithValue.h">
+      <Filter>vm</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

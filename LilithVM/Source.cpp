@@ -5,9 +5,11 @@ int main(void)
 {
 	LilithVM llvm;
 
-	llvm.exec(R"(
+	auto result = llvm.exec(R"(
 		42	
 	)");
+
+	log(AS_NUMBER(result));
 
 	return 0;
 }

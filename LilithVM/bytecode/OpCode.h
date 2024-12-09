@@ -7,6 +7,7 @@
 
 #include <cstddef>
 
-constexpr std::byte OP_HALT{ 0x00 }; // Stops the program
+constexpr uint8_t OP_HALT{ 0x00 };  // Stops the program
+constexpr uint8_t OP_CONST{ 0x01 }; // Pushes a const onto the stack
 
-#endif // __OpCode_H
+#endif // OpCode_H

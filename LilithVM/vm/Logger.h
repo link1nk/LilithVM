@@ -2,8 +2,8 @@
 * Logger and error reporter
 */
 
-#ifndef __Logger_H
-#define __Logger_H
+#ifndef Logger_H
+#define Logger_H
 
 #include <sstream>
 #include <iostream>
@@ -22,4 +22,4 @@ public:
 
 #define log(value) std::cout << #value << " = " << std::hex << (value) << '\n';
 
-#endif // __Logger_H
+#endif // Logger_H

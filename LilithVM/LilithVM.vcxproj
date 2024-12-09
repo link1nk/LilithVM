@@ -136,6 +136,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bytecode\OpCode.h" />
+    <ClInclude Include="vm\LilithValue.h" />
     <ClInclude Include="vm\LilithVM.h" />
     <ClInclude Include="vm\Logger.h" />
   </ItemGroup>
