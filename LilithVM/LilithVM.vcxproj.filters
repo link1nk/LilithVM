@@ -13,6 +13,9 @@
     <ClCompile Include="vm\LilithVM.cpp">
       <Filter>vm</Filter>
     </ClCompile>
+    <ClCompile Include="vm\LilithValue.cpp">
+      <Filter>vm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vm\LilithVM.h">
