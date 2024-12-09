@@ -10,5 +10,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="vm\LilithVM.cpp">
+      <Filter>vm</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="vm\LilithVM.h">
+      <Filter>vm</Filter>
+    </ClInclude>
+    <ClInclude Include="vm\OpCode.h">
+      <Filter>bytecode</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
