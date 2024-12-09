@@ -18,8 +18,11 @@
     <ClInclude Include="vm\LilithVM.h">
       <Filter>vm</Filter>
     </ClInclude>
-    <ClInclude Include="vm\OpCode.h">
+    <ClInclude Include="bytecode\OpCode.h">
       <Filter>bytecode</Filter>
+    </ClInclude>
+    <ClInclude Include="vm\Logger.h">
+      <Filter>vm</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

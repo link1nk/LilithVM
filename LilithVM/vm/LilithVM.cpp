@@ -6,7 +6,7 @@ LilithVM::LilithVM() :
 
 void LilithVM::exec(const std::string& program)
 {
-	code = { OP_HALT };
+	code = { std::byte(1) };
 
 	ip = &code[0];
 
@@ -17,9 +17,19 @@ void LilithVM::eval()
 {
 	for (;;)
 	{
-		switch (std::to_integer<int>(READ_BYTE()))
+		auto opcode{ std::to_integer<int>(READ_BYTE()) };
+
+#ifdef _DEBUG
+		log(opcode);
+#endif // _DEBUG
+
+		switch (opcode)
 		{
-		case std::to_integer<int>(OP_HALT): return;
+		case std::to_integer<int>(OP_HALT):
+			return;
+
+		default:
+			DIE << "Unknow opcode: " << std::hex << opcode;
 		}
 	}
 }

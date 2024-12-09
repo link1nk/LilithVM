@@ -2,14 +2,15 @@
 *  Lilith Virtual Machine
 */
 
-#ifndef LILITH_VM
-#define LILITH_VM
+#ifndef LilithVM_H
+#define LilithVM_H
 
 #include <string>
 #include <vector>
 #include <cstddef>
 
-#include "OpCode.h"
+#include "../bytecode/OpCode.h"
+#include "Logger.h"
 
 #define READ_BYTE() *ip++
 
@@ -26,4 +27,4 @@ public:
 	void eval();                           /* Main eval loop */
 };
 
-#endif // __LILITH_VM
+#endif // __LilithVM_H
