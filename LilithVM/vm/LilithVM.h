@@ -30,6 +30,16 @@
 */
 #define STACK_LIMIT 512
 
+/*
+* Binary operations
+*/
+#define BINARY_OP(op) \
+	{ \
+		auto op2 = AS_NUMBER(pop()); \
+		auto op1 = AS_NUMBER(pop()); \
+		push(NUMBER(op1 op op2)); \
+	}
+
 class LilithVM
 {
 private:

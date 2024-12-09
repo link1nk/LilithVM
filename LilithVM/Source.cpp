@@ -9,7 +9,7 @@ int main(void)
 		42	
 	)");
 
-	log(AS_NUMBER(result));
+	log(AS_CPPSTRING(result));
 
 	return 0;
 }
