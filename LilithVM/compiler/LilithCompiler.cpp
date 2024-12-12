@@ -26,6 +26,22 @@ size_t LilithCompiler::booleanConstIdx(bool value)
     return co->constants.size() - 1;
 }
 
+size_t LilithCompiler::getOffset()
+{
+    return co->code.size();
+}
+
+void LilithCompiler::patchJumpAddress(size_t offset, uint16_t value)
+{
+    writeByteAtOffset(offset, (value >> 8) & 0xff);
+    writeByteAtOffset(offset + 1, value & 0xff);
+}
+
+void LilithCompiler::writeByteAtOffset(size_t offset, uint8_t value)
+{
+    co->code[offset] = value;
+}
+
 LilithCompiler::LilithCompiler()
 {
     LilithValue llv = ALLOC_CODE("main");
@@ -71,10 +87,52 @@ void LilithCompiler::loadBoolean(bool boolean)
     emit(booleanConstIdx(boolean));
 }
 
-void LilithCompiler::compare(std::string op)
+void LilithCompiler::loadCompare(std::string op)
 {
     emit(OP_COMPARE);
     emit(compareOps[op]);
+}
+
+void LilithCompiler::loadIf()
+{
+    emit(OP_JMP_IF_FALSE);
+
+    emit(0xaa);
+    emit(0xbb);
+
+    elseJmpAddr = getOffset() - 2;
+}
+
+void LilithCompiler::loadIf(std::string op)
+{
+    loadCompare(op);
+
+    emit(OP_JMP_IF_FALSE);
+
+    emit(0xaa);
+    emit(0xbb);
+
+    elseJmpAddr = getOffset() - 2;
+}
+
+void LilithCompiler::loadElse()
+{
+    emit(OP_JMP);
+
+    emit(0xcc);
+    emit(0xdd);
+
+    endAddr = getOffset() - 2;
+
+    elseBranchAddr = getOffset();
+}
+
+void LilithCompiler::commitIf()
+{
+    patchJumpAddress(elseJmpAddr, elseBranchAddr);
+
+    endBranchAddr = getOffset();
+    patchJumpAddress(endAddr, endBranchAddr);
 }
 
 void LilithCompiler::loadInstruction(uint8_t opcode)

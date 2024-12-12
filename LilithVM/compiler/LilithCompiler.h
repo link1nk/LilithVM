@@ -26,13 +26,21 @@
 class LilithCompiler
 {
 private:
-	CodeObject* co;                                    // Compiling code object
-	static std::map<std::string, uint8_t> compareOps;
+	CodeObject* co;                                        // Compiling code object
+	static std::map<std::string, uint8_t> compareOps;      
 
-	void emit(uint8_t code);                           // Emits data to the bytecode
-	size_t numericConstIdx(double value);              // Allocates a numeric constant
-	size_t numericConstIdx(std::string value);         // Allocates a string constant
-	size_t booleanConstIdx(bool value);                // Allocates a boolean constant
+	size_t elseJmpAddr;
+	size_t endAddr;
+	size_t elseBranchAddr;
+	size_t endBranchAddr;
+													       
+	void emit(uint8_t code);                               // Emits data to the bytecode
+	size_t numericConstIdx(double value);                  // Allocates a numeric constant
+	size_t numericConstIdx(std::string value);             // Allocates a string constant
+	size_t booleanConstIdx(bool value);                    // Allocates a boolean constant
+	size_t getOffset();                                    // Returns current bytecode offset
+	void patchJumpAddress(size_t offset, uint16_t value);  // Patches jump address
+	void writeByteAtOffset(size_t offset, uint8_t value);  // Writes byte at offset
 
 public:
 	LilithCompiler();
@@ -43,7 +51,11 @@ public:
 	void loadConst(double constant);
 	void loadConst(std::string constant);
 	void loadBoolean(bool boolean);
-	void compare(std::string op);
+	void loadCompare(std::string op);
+	void loadIf();
+	void loadIf(std::string op);
+	void loadElse();
+	void commitIf();
 	void loadInstruction(uint8_t opcode);
 };
 

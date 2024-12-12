@@ -133,6 +133,27 @@ LilithValue LilithVM::eval()
 			break;
 		}
 
+		//---------------------------------------------------
+		// Conditional jump
+		//---------------------------------------------------
+		case OP_JMP_IF_FALSE:
+		{
+			auto cond = AS_BOOLEAN(pop());
+
+			auto address = READ_SHORT();
+
+			if (!cond)
+			{
+				ip = TO_ADDRESS(address);
+			}
+
+			break;
+		}
+		
+		case OP_JMP:
+			ip = TO_ADDRESS(READ_SHORT());
+			break;
+
 		default:
 		{
 			DIE << "Unknow opcode: " << std::hex << opcode;

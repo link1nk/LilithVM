@@ -22,9 +22,19 @@
 #define READ_BYTE() static_cast<int>(*ip++)
 
 /*
+* Reads a short word (2 bytes)
+*/
+#define READ_SHORT() (ip += 2, (uint16_t)((ip[-2] << 8) | ip[-1]))
+
+/*
+* Converts bytecode index to a pointer
+*/
+#define TO_ADDRESS(index) (&co->code[index])
+
+/*
 * Gets a constant from the pool
 */
-#define GET_CONST() co->constants[READ_BYTE()]
+#define GET_CONST() (co->constants[READ_BYTE()])
 
 /*
 * Stack top (stack overflow after exceeding)
