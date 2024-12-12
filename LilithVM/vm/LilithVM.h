@@ -11,6 +11,7 @@
 #include <array>
 
 #include "../bytecode/OpCode.h"
+#include "../bytecode/LilithFile.h"
 #include "Logger.h"
 #include "LilithValue.h"
 
@@ -23,7 +24,7 @@
 /*
 * Gets a constant from the pool
 */
-#define GET_CONST() constants[READ_BYTE()]
+#define GET_CONST() co->constants[READ_BYTE()]
 
 /*
 * Stack top (stack overflow after exceeding)
@@ -43,11 +44,10 @@
 class LilithVM
 {
 private:
-	std::vector<uint8_t> code;                     // Bytecode
-	std::vector<LilithValue> constants;            // Constant pool
+	CodeObject* co;                                // Code object
 	std::array<LilithValue, STACK_LIMIT> stack;    // Operands stack
 	uint8_t* ip;                                   // Instruction pointer
-	LilithValue* sp;                               // Stack pointer
+	LilithValue* sp;                               // Stack 
 
 	LilithValue eval();                            // Main eval loop
 	void push(const LilithValue& value);           // Pushes a value onto the stack
@@ -55,8 +55,8 @@ private:
 public:
 	LilithVM();
 
-	LilithValue exec(const std::string& program);  // Executes a program
-
+	LilithValue exec(CodeObject* program);  // Executes a program
+	LilithValue execFromFile(std::string program);
 };
 
 #endif // LilithVM_H

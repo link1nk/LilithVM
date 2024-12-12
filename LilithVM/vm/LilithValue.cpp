@@ -7,6 +7,10 @@ std::string lilithValueToTypeString(const LilithValue& lilithValue)
 	{
 		return "NUMBER";
 	}
+	else if (IS_BOOLEAN(lilithValue))
+	{
+		return "BOOLEAN";
+	}
 	else if (IS_STRING(lilithValue))
 	{
 		return "STRING";
@@ -30,6 +34,10 @@ std::string lilithValueToConstantString(const LilithValue& lilithValue)
 	if (IS_NUMBER(lilithValue))
 	{
 		ss << lilithValue.number;
+	}
+	else if (IS_BOOLEAN(lilithValue))
+	{
+		ss << std::boolalpha << lilithValue.boolean;
 	}
 	else if (IS_STRING(lilithValue))
 	{

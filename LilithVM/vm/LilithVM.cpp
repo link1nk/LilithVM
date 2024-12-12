@@ -1,26 +1,33 @@
 #include "LilithVM.h"
+#include <string>
 
 LilithVM::LilithVM() :
-	ip(nullptr), sp(nullptr), stack({})
+	co(nullptr), ip(nullptr), sp(nullptr), stack({})
 {
 }
 
-LilithValue LilithVM::exec(const std::string& program)
+LilithValue LilithVM::exec(CodeObject* program)
 {
-	LilithValue llv[] = { ALLOC_STRING("Lincoln "), ALLOC_STRING("Dias") };
-
-	for (auto e : llv)
-	{
-		constants.push_back(e);
-	}
-
-	code = { OP_CONST, 0, OP_CONST, 1, OP_ADD, OP_HALT };
+	co = program;
 
 	// Init the stack
 	sp = &stack[0];
 
 	// Set instruction pointer to the beginning
-	ip = &code[0];
+	ip = &co->code[0];
+
+	return eval();
+}
+
+LilithValue LilithVM::execFromFile(std::string file)
+{
+	co = LilithFileReader::readFromFile(file)[0];
+
+	// Init the stack
+	sp = &stack[0];
+
+	// Set instruction pointer to the beginning
+	ip = &co->code[0];
 
 	return eval();
 }
@@ -90,7 +97,7 @@ LilithValue LilithVM::eval()
 
 		case OP_DIV:
 		{
-			BINARY_OP(/ );
+			BINARY_OP(/);
 			break;
 		}
 

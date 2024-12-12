@@ -7,6 +7,9 @@
     <Filter Include="bytecode">
       <UniqueIdentifier>{52ef3a7b-44a7-46f3-bc07-25a23d85d8da}</UniqueIdentifier>
     </Filter>
+    <Filter Include="compiler">
+      <UniqueIdentifier>{f3af740a-1167-4c4f-bbc3-e03384e70d44}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp" />
@@ -15,6 +18,12 @@
     </ClCompile>
     <ClCompile Include="vm\LilithValue.cpp">
       <Filter>vm</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\LilithCompiler.cpp">
+      <Filter>compiler</Filter>
+    </ClCompile>
+    <ClCompile Include="bytecode\LilithFile.cpp">
+      <Filter>bytecode</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -29,6 +38,12 @@
     </ClInclude>
     <ClInclude Include="vm\LilithValue.h">
       <Filter>vm</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\LilithCompiler.h">
+      <Filter>compiler</Filter>
+    </ClInclude>
+    <ClInclude Include="bytecode\LilithFile.h">
+      <Filter>bytecode</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
