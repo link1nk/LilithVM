@@ -8,19 +8,17 @@ int main(void)
 
 	LilithCompiler compiler;
 
-	compiler.loadBoolean(false);
-
-	compiler.compile("numbers.llt");
+	compiler.loadConst(6);
+	compiler.loadConst(6);
+	compiler.compare("==");
+	
+	compiler.compile("comparison.llt");
 
 	/*
-	compiler.loadConst("Lincoln ");
-	compiler.loadConst("Dias");
-	compiler.loadInstruction(OP_ADD);
-
-	auto result = llvm.exec(compiler.compile("myname.llt"));
+	auto result = llvm.exec(compiler.compile());
 	*/
 
-	auto result = llvm.execFromFile("numbers.llt");
+	auto result = llvm.execFromFile("comparison.llt");
 
 	log(result);
 

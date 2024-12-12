@@ -41,6 +41,34 @@
 		push(NUMBER(op1 op op2)); \
 	}
 
+/*
+* Generic values comparison
+*/
+#define COMPARE_VALUES(op, v1, v2) \
+		bool res = false;          \
+		switch (op)                \
+		{                          \
+		case 0:                    \
+			res = v1 < v2;         \
+			break;                 \
+		case 1:                    \
+			res = v1 > v2;         \
+			break;                 \
+		case 2:                    \
+			res = v1 == v2;        \
+			break;                 \
+		case 3:                    \
+			res = v1 >= v2;        \
+			break;                 \
+		case 4:                    \
+			res = v1 <= v2;        \
+			break;                 \
+		case 5:                    \
+			res = v1 != v2;        \
+			break;                 \
+		}                          \
+		push(BOOLEAN(res));
+
 class LilithVM
 {
 private:

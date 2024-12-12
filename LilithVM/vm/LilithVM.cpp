@@ -108,6 +108,30 @@ LilithValue LilithVM::eval()
 		}
 		//---------------------------------------------------
 
+		//---------------------------------------------------
+		// Comparison operation
+		//---------------------------------------------------
+		case OP_COMPARE:
+		{
+			auto op = READ_BYTE();
+
+			auto op2 = pop();
+			auto op1 = pop();
+
+			if (IS_NUMBER(op1) && IS_NUMBER(op2))
+			{
+				auto v1 = AS_NUMBER(op1);
+				auto v2 = AS_NUMBER(op2);
+				COMPARE_VALUES(op, v1, v2);
+			}
+			else if (IS_STRING(op1) && IS_STRING(op2))
+			{
+				auto s1 = AS_CPPSTRING(op1);
+				auto s2 = AS_CPPSTRING(op2);
+				COMPARE_VALUES(op, s1, s2);
+			}
+			break;
+		}
 
 		default:
 		{

@@ -1,5 +1,8 @@
 #include "LilithCompiler.h"
 
+std::map<std::string, uint8_t> LilithCompiler::compareOps
+{ {"<", 0}, {">", 1}, {"==", 2}, {">=", 3}, {"<=", 4}, {"!=", 5} };
+
 void LilithCompiler::emit(uint8_t code)
 {
     co->code.push_back(code);
@@ -66,6 +69,12 @@ void LilithCompiler::loadBoolean(bool boolean)
 {
     emit(OP_CONST);
     emit(booleanConstIdx(boolean));
+}
+
+void LilithCompiler::compare(std::string op)
+{
+    emit(OP_COMPARE);
+    emit(compareOps[op]);
 }
 
 void LilithCompiler::loadInstruction(uint8_t opcode)
