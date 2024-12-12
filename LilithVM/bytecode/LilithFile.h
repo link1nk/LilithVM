@@ -1,5 +1,5 @@
-#ifndef LilithFileWriter_H
-#define LilithFileWriter_H
+#ifndef LilithFile_H
+#define LilithFile_H
 
 #include <iostream>
 #include <fstream>
@@ -32,4 +32,4 @@ public:
     static std::vector<CodeObject*> readFromFile(const std::string& fileName);
 };
 
-#endif // LilithFileWriter_H
+#endif // LilithFile_H

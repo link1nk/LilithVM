@@ -30,14 +30,16 @@ private:
 	void emit(uint8_t code);                    // Emits data to the bytecode
 	size_t numericConstIdx(double value);       // Allocates a numeric constant
 	size_t numericConstIdx(std::string value);  // Allocates a string constant
-
+	size_t booleanConstIdx(bool value);         // Allocates a boolean constant
 public:
 	LilithCompiler();
 
 	CodeObject* compile();
 	CodeObject* compile(std::string file);
+
 	void loadConst(double constant);
 	void loadConst(std::string constant);
+	void loadBoolean(bool boolean);
 	void loadInstruction(uint8_t opcode);
 };
 

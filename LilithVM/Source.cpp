@@ -8,6 +8,10 @@ int main(void)
 
 	LilithCompiler compiler;
 
+	compiler.loadBoolean(false);
+
+	compiler.compile("numbers.llt");
+
 	/*
 	compiler.loadConst("Lincoln ");
 	compiler.loadConst("Dias");
@@ -16,7 +20,7 @@ int main(void)
 	auto result = llvm.exec(compiler.compile("myname.llt"));
 	*/
 
-	auto result = llvm.execFromFile("myname.llt");
+	auto result = llvm.execFromFile("numbers.llt");
 
 	log(result);
 

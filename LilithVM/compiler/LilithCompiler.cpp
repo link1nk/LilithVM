@@ -17,6 +17,12 @@ size_t LilithCompiler::numericConstIdx(std::string value)
 	return co->constants.size() - 1;
 }
 
+size_t LilithCompiler::booleanConstIdx(bool value)
+{
+    ALLOC_CONST(IS_BOOLEAN, AS_BOOLEAN, BOOLEAN, value);
+    return co->constants.size() - 1;
+}
+
 LilithCompiler::LilithCompiler()
 {
     LilithValue llv = ALLOC_CODE("main");
@@ -54,6 +60,12 @@ void LilithCompiler::loadConst(std::string constant)
 {
     emit(OP_CONST);
     emit(numericConstIdx(constant));
+}
+
+void LilithCompiler::loadBoolean(bool boolean)
+{
+    emit(OP_CONST);
+    emit(booleanConstIdx(boolean));
 }
 
 void LilithCompiler::loadInstruction(uint8_t opcode)
