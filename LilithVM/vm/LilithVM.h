@@ -22,9 +22,10 @@
 #define READ_BYTE() static_cast<int>(*ip++)
 
 /*
-* Reads a short word (2 bytes)
+* Reads a dword (4 bytes)
 */
-#define READ_SHORT() (ip += 2, (uint16_t)((ip[-2] << 8) | ip[-1]))
+#define READ_DWORD() (ip += 4, \
+                   (uint32_t)((ip[-4] << 24) | (ip[-3] << 16) | (ip[-2] << 8) | ip[-1]))
 
 /*
 * Converts bytecode index to a pointer

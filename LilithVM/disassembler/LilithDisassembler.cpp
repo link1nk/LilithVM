@@ -10,7 +10,7 @@ size_t LilithDisassembler::disassembleInstruction(CodeObject* co, size_t offset)
 {
 	std::ios_base::fmtflags f{ std::cout.flags() };
 
-	std::cout << std::uppercase << std::hex << std::setfill('0') << std::setw(4)
+	std::cout << std::uppercase << std::hex << std::setfill('0') << std::setw(8)
 		      << offset << "    ";
 
 	auto opcode = co->code[offset];
@@ -53,13 +53,13 @@ void LilithDisassembler::dumpBytes(CodeObject* co, size_t offset, size_t count)
 
 	std::stringstream ss;
 
-	for (auto i = 0; i < count; i++)
+	for (size_t i = 0; i < count; i++)
 	{
 		ss << std::uppercase << std::hex << std::setfill('0') << std::setw(2)
-		   << (((int)co->code[offset + i]) & 0xFF) << " ";
+			<< (((int)co->code[offset + i]) & 0xFF) << " ";
 	}
 
-	std::cout << std::left << std::setfill(' ') << std::setw(12) << ss.str();
+	std::cout << std::left << std::setfill(' ') << std::setw(17) << ss.str();
 	std::cout.flags(f);
 }
 
@@ -102,27 +102,30 @@ size_t LilithDisassembler::disassembleJump(CodeObject* co, uint8_t opcode, size_
 {
 	std::ios_base::fmtflags f{ std::cout.flags() };
 
-	dumpBytes(co, offset, 3);
+	dumpBytes(co, offset, 5);
 	printOpcode(opcode);
-	uint16_t address = readWordOffset(co, offset + 1);
+	uint32_t address = readDwordOffset(co, offset + 1);
 
-	std::cout << std::uppercase << std::hex << std::setfill('0') << std::setw(4)
-			  << (int)address << " ";
+	std::cout << std::uppercase << std::hex << std::setfill('0') << std::setw(8)
+		<< (int)address << " ";
 
 	std::cout.flags(f);
 
-	return offset + 3;
+	return offset + 5;
 }
 
-uint16_t LilithDisassembler::readWordOffset(CodeObject* co, size_t offset)
+uint32_t LilithDisassembler::readDwordOffset(CodeObject* co, size_t offset)
 {
-	return (uint16_t)((co->code[offset] << 8) | co->code[offset + 1]);
+	return (uint32_t)((co->code[offset] << 24) |
+		(co->code[offset + 1] << 16) |
+		(co->code[offset + 2] << 8) |
+		co->code[offset + 3]);
 }
 
 void LilithDisassembler::disassemble(CodeObject* co)
 {
-	std::cout << "\n---------------- Disassembly: " << co->name
-			  << " ----------------\n\n";
+	std::cout << "\n------------------------ Disassembly: " << co->name
+			  << " ------------------------\n\n";
 
 	size_t offset{ 0 };
 

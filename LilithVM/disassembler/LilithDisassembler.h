@@ -20,7 +20,7 @@ private:
 	size_t disassembleConst(CodeObject* co, uint8_t opcode, size_t offset);
 	size_t disassembleCompare(CodeObject* co, uint8_t opcode, size_t offset);
 	size_t disassembleJump(CodeObject* co, uint8_t opcode, size_t offset);
-	uint16_t readWordOffset(CodeObject* co, size_t offset);
+	uint32_t readDwordOffset(CodeObject* co, size_t offset);
 
 public:
 	void disassemble(CodeObject* co);                               // Disassembles a code unit

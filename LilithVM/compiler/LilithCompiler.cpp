@@ -36,8 +36,10 @@ size_t LilithCompiler::getOffset()
 
 void LilithCompiler::patchJumpAddress(size_t offset, uint16_t value)
 {
-    writeByteAtOffset(offset, (value >> 8) & 0xff);
-    writeByteAtOffset(offset + 1, value & 0xff);
+    writeByteAtOffset(offset, (value >> 24) & 0xff);
+    writeByteAtOffset(offset + 1, (value >> 16) & 0xff);
+    writeByteAtOffset(offset + 2, (value >> 8) & 0xff);
+    writeByteAtOffset(offset + 3, value & 0xff);
 }
 
 void LilithCompiler::writeByteAtOffset(size_t offset, uint8_t value)
@@ -107,26 +109,30 @@ void LilithCompiler::startIf(std::string op)
         loadCompare(op);
     }
     emit(OP_JMP_IF_FALSE);
-    emit(0xaa);
-    emit(0xbb);
+    emit(0);
+    emit(0);
+    emit(0);
+    emit(0);
 
     IfElseBlock block;
-    block.elseJmpAddr = getOffset() - 2;
+    block.elseJmpAddr = getOffset() - 4;
     ifElseStack.push(block);
 }
 
 void LilithCompiler::startElse()
 {
     emit(OP_JMP);
-    emit(0xcc);
-    emit(0xdd);
+    emit(0);
+    emit(0);
+    emit(0);
+    emit(0);
 
     if (ifElseStack.empty()) {
         throw std::runtime_error("Mismatched 'else': no corresponding 'if' block.");
     }
 
     auto& block = ifElseStack.top();
-    block.endAddr = getOffset() - 2;
+    block.endAddr = getOffset() - 4;
     block.elseBranchAddr = getOffset();
 
     patchJumpAddress(block.elseJmpAddr, block.elseBranchAddr);

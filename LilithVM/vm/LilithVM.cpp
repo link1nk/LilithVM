@@ -147,7 +147,7 @@ LilithValue LilithVM::eval()
 		{
 			auto cond = AS_BOOLEAN(pop());
 
-			auto address = READ_SHORT();
+			auto address = READ_DWORD();
 
 			if (!cond)
 			{
@@ -158,7 +158,7 @@ LilithValue LilithVM::eval()
 		}
 		
 		case OP_JMP:
-			ip = TO_ADDRESS(READ_SHORT());
+			ip = TO_ADDRESS(READ_DWORD());
 			break;
 
 		default:
