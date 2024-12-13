@@ -17,6 +17,8 @@ constexpr uint8_t OP_MUL          { 0x05 };  // Mul instruction
 constexpr uint8_t OP_COMPARE      { 0x06 };  // Comparison
 constexpr uint8_t OP_JMP_IF_FALSE { 0x07 };  // Jump if the value on the stack is false
 constexpr uint8_t OP_JMP          { 0x08 };  // Unconditional jump
+constexpr uint8_t OP_GET_GLOBAL   { 0x09 };  // Returns global variable
+constexpr uint8_t OP_SET_GLOBAL   { 0x0A };  // Returns global variable
 
 #define OP_STR(op) \
 	case OP_##op:  \
@@ -35,6 +37,8 @@ static std::string opcodeToString(uint8_t opcode)
 		OP_STR(COMPARE);
 		OP_STR(JMP_IF_FALSE);
 		OP_STR(JMP);
+		OP_STR(GET_GLOBAL);
+		OP_STR(SET_GLOBAL);
 	default:
 		DIE << "opcodeToString: unknown opcode: " << (int)opcode;
 	}

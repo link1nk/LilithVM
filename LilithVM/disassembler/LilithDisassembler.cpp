@@ -30,6 +30,9 @@ size_t LilithDisassembler::disassembleInstruction(CodeObject* co, size_t offset)
 	case OP_JMP_IF_FALSE:
 	case OP_JMP:
 		return disassembleJump(co, opcode, offset);
+	case OP_GET_GLOBAL:
+	case OP_SET_GLOBAL:
+		return disassembleGlobal(co, opcode, offset);
 	default:
 		DIE << "disassemblyInstruction: no disassembly for "
 			<< opcodeToString(opcode);
@@ -59,7 +62,7 @@ void LilithDisassembler::dumpBytes(CodeObject* co, size_t offset, size_t count)
 			<< (((int)co->code[offset + i]) & 0xFF) << " ";
 	}
 
-	std::cout << std::left << std::setfill(' ') << std::setw(17) << ss.str();
+	std::cout << std::left << std::setfill(' ') << std::setw(20) << ss.str();
 	std::cout.flags(f);
 }
 
@@ -114,6 +117,18 @@ size_t LilithDisassembler::disassembleJump(CodeObject* co, uint8_t opcode, size_
 	return offset + 5;
 }
 
+size_t LilithDisassembler::disassembleGlobal(CodeObject* co, uint8_t opcode, size_t offset)
+{
+	dumpBytes(co, offset, 2);
+	printOpcode(opcode);
+
+	auto globalIndex = co->code[offset + 1];
+
+	std::cout << (int)globalIndex << " (" << global->get(globalIndex).name << ")";
+
+	return offset + 2;
+}
+
 uint32_t LilithDisassembler::readDwordOffset(CodeObject* co, size_t offset)
 {
 	return (uint32_t)((co->code[offset] << 24) |
@@ -121,6 +136,10 @@ uint32_t LilithDisassembler::readDwordOffset(CodeObject* co, size_t offset)
 		(co->code[offset + 2] << 8) |
 		co->code[offset + 3]);
 }
+
+LilithDisassembler::LilithDisassembler(std::shared_ptr<Global> global) :
+	global(global)
+{}
 
 void LilithDisassembler::disassemble(CodeObject* co)
 {

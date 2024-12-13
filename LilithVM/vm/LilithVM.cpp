@@ -3,8 +3,9 @@
 #include <string>
 
 LilithVM::LilithVM() :
-	co(nullptr), ip(nullptr), sp(nullptr), stack({})
+	co(nullptr), ip(nullptr), sp(nullptr), stack({}), global(std::make_shared<Global>()), compiler(std::make_unique<LilithCompiler>(global))
 {
+	setGlobalVariables();
 }
 
 LilithValue LilithVM::exec(CodeObject* program)
@@ -19,7 +20,7 @@ LilithValue LilithVM::exec(CodeObject* program)
 
 #ifdef _DEBUG
 	// Debug disassembly:
-	LilithCompiler::disassembleBytecode(co);
+	compiler->disassembleBytecode(co);
 #endif // _DEBUG
 
 	return eval();
@@ -37,7 +38,7 @@ LilithValue LilithVM::execFromFile(std::string file)
 
 #ifdef _DEBUG
 	// Debug disassembly:
-	LilithCompiler::disassembleBytecode(co);
+	compiler->disassembleBytecode(co);
 #endif // _DEBUG
 
 	return eval();
@@ -161,6 +162,24 @@ LilithValue LilithVM::eval()
 			ip = TO_ADDRESS(READ_DWORD());
 			break;
 
+		//---------------------------------------------------
+		// Global variable value
+		//---------------------------------------------------
+		case OP_GET_GLOBAL:
+		{
+			auto globalIndex = READ_BYTE();
+			push(global->get(globalIndex).value);
+			break;
+		}
+
+		case OP_SET_GLOBAL:
+		{
+			auto globalIndex = READ_BYTE();
+			auto value = peek(0);
+			global->set(globalIndex, value);
+			break;
+		}
+
 		default:
 		{
 			DIE << "Unknow opcode: " << std::hex << opcode;
@@ -187,4 +206,19 @@ LilithValue LilithVM::pop()
 	}
 	--sp;
 	return *sp;
+}
+
+LilithValue LilithVM::peek(size_t offset)
+{
+	if (stack.size() == 0)
+	{
+		DIE << "peek(): empty stack\n";
+	}
+	return *(sp - 1 - offset);
+}
+
+void LilithVM::setGlobalVariables()
+{
+	global->addConst("x", 10);
+	global->addConst("y", 10);
 }

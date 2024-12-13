@@ -3,9 +3,6 @@
 std::map<std::string, uint8_t> LilithCompiler::compareOps
 { {"<", 0}, {">", 1}, {"==", 2}, {">=", 3}, {"<=", 4}, {"!=", 5} };
 
-std::unique_ptr<LilithDisassembler> LilithCompiler::disassembler
-{ std::make_unique<LilithDisassembler>() };
-
 void LilithCompiler::emit(uint8_t code)
 {
     co->code.push_back(code);
@@ -47,7 +44,8 @@ void LilithCompiler::writeByteAtOffset(size_t offset, uint8_t value)
     co->code[offset] = value;
 }
 
-LilithCompiler::LilithCompiler()
+LilithCompiler::LilithCompiler(std::shared_ptr<Global> global) :
+    global(global), disassembler(std::make_unique<LilithDisassembler>(global))
 {
     LilithValue llv = ALLOC_CODE("main");
 
@@ -149,6 +147,67 @@ void LilithCompiler::endIf()
 
     block.endBranchAddr = getOffset();
     patchJumpAddress(block.endAddr, block.endBranchAddr);
+}
+
+void LilithCompiler::accessGlobalVariable(const std::string& name)
+{
+    if (!global->exists(name))
+    {
+        DIE << "[LilithCompiler]: Reference Error: " << name;
+    }
+
+    emit(OP_GET_GLOBAL);
+    emit(global->getGlobalIndex(name));
+}
+
+void LilithCompiler::setGlobalVariable(const std::string& name, double value)
+{
+    loadConst(value);
+
+    global->define(name);
+
+    emit(OP_SET_GLOBAL);
+    emit(global->getGlobalIndex(name));
+}
+
+void LilithCompiler::setGlobalVariable(const std::string& name, std::string value)
+{
+    loadConst(value);
+
+    global->define(name);
+
+    emit(OP_SET_GLOBAL);
+    emit(global->getGlobalIndex(name));
+}
+
+void LilithCompiler::updateGlobalVariable(const std::string& name, double value)
+{
+    loadConst(value);
+
+    auto globalIndex = global->getGlobalIndex(name);
+
+    if (globalIndex == -1)
+    {
+        DIE << "Reference error: " << name << " is not defined!";
+    }
+
+    emit(OP_SET_GLOBAL);
+    emit(globalIndex);
+}
+
+void LilithCompiler::updateGlobalVariable(const std::string& name, std::string value)
+{
+    loadConst(value);
+
+    auto globalIndex = global->getGlobalIndex(name);
+
+    if (globalIndex == -1)
+    {
+        DIE << "Reference error: " << name << " is not defined!";
+    }
+
+    emit(OP_SET_GLOBAL);
+    emit(globalIndex);
 }
 
 void LilithCompiler::loadInstruction(uint8_t opcode)

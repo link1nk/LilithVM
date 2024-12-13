@@ -13,46 +13,76 @@
     <Filter Include="disassembler">
       <UniqueIdentifier>{12606197-6bcf-4f03-ab6d-c9d57c747bde}</UniqueIdentifier>
     </Filter>
+    <Filter Include="vm\Header Files">
+      <UniqueIdentifier>{5714a6e9-94d2-46ae-acc2-88a3bd5c179f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vm\Source Files">
+      <UniqueIdentifier>{449e81e6-0892-4f9b-a1b7-7a013d0d8085}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="disassembler\Header Files">
+      <UniqueIdentifier>{a46ada62-e30e-4e59-9f78-f2216034350a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="disassembler\Source Files">
+      <UniqueIdentifier>{a865215f-ec01-49c6-8583-db80d0ac3aa3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="compiler\Header Files">
+      <UniqueIdentifier>{01cfefdc-9331-4f50-a8c4-6a3c36470b09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="compiler\Source Files">
+      <UniqueIdentifier>{c06e7359-e4fe-431f-8beb-1f1389f0a606}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bytecode\Header Files">
+      <UniqueIdentifier>{0ff94bb1-cbf8-477f-b042-d8cbcebcb763}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bytecode\Source Files">
+      <UniqueIdentifier>{1fc0ec8a-7fdc-43b7-b659-3c49d73dbae8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="vm\LilithVM.cpp">
-      <Filter>vm</Filter>
-    </ClCompile>
     <ClCompile Include="vm\LilithValue.cpp">
-      <Filter>vm</Filter>
+      <Filter>vm\Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="compiler\LilithCompiler.cpp">
-      <Filter>compiler</Filter>
-    </ClCompile>
-    <ClCompile Include="bytecode\LilithFile.cpp">
-      <Filter>bytecode</Filter>
+    <ClCompile Include="vm\LilithVM.cpp">
+      <Filter>vm\Source Files</Filter>
     </ClCompile>
     <ClCompile Include="disassembler\LilithDisassembler.cpp">
-      <Filter>disassembler</Filter>
+      <Filter>disassembler\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="compiler\LilithCompiler.cpp">
+      <Filter>compiler\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bytecode\LilithFile.cpp">
+      <Filter>bytecode\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="vm\Global.cpp">
+      <Filter>vm\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="vm\LilithVM.h">
-      <Filter>vm</Filter>
+    <ClInclude Include="vm\LilithValue.h">
+      <Filter>vm\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="bytecode\OpCode.h">
-      <Filter>bytecode</Filter>
+    <ClInclude Include="vm\LilithVM.h">
+      <Filter>vm\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="vm\Logger.h">
-      <Filter>vm</Filter>
-    </ClInclude>
-    <ClInclude Include="vm\LilithValue.h">
-      <Filter>vm</Filter>
-    </ClInclude>
-    <ClInclude Include="compiler\LilithCompiler.h">
-      <Filter>compiler</Filter>
-    </ClInclude>
-    <ClInclude Include="bytecode\LilithFile.h">
-      <Filter>bytecode</Filter>
+      <Filter>vm\Header Files</Filter>
     </ClInclude>
     <ClInclude Include="disassembler\LilithDisassembler.h">
-      <Filter>disassembler</Filter>
+      <Filter>disassembler\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="compiler\LilithCompiler.h">
+      <Filter>compiler\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bytecode\LilithFile.h">
+      <Filter>bytecode\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="bytecode\OpCode.h">
+      <Filter>bytecode\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vm\Global.h">
+      <Filter>vm\Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

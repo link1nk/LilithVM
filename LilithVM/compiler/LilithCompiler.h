@@ -5,6 +5,7 @@
 #include <map>
 #include <stack>
 #include "../vm/LilithValue.h"
+#include "../vm/Global.h"
 #include "../bytecode/OpCode.h"
 #include "../bytecode/LilithFile.h"
 #include "../disassembler/LilithDisassembler.h"
@@ -24,13 +25,14 @@
 		}                                                   \
 		co->constants.push_back(allocator(value));          \
 	}                                                     
- 
+
 class LilithCompiler
 {
 private:
-	CodeObject* co;                                           // Compiling code object
+	CodeObject* co;                                        // Compiling code object
 	static std::map<std::string, uint8_t> compareOps;      
-	static std::unique_ptr<LilithDisassembler> disassembler;  // Disassembler
+	std::unique_ptr<LilithDisassembler> disassembler;      // Disassembler
+	std::shared_ptr<Global> global;                        // Global object
 
 	struct IfElseBlock
 	{
@@ -51,12 +53,12 @@ private:
 	void writeByteAtOffset(size_t offset, uint8_t value);  // Writes byte at offset
 
 public:
-	LilithCompiler();
+	LilithCompiler(std::shared_ptr<Global> global);
 
 	CodeObject* compile();
 	CodeObject* compile(std::string file);
 
-	static void disassembleBytecode(CodeObject* co);
+	void disassembleBytecode(CodeObject* co);
 
 	void loadConst(double constant);
 	void loadConst(std::string constant);
@@ -65,6 +67,12 @@ public:
 	void startIf(std::string op);
 	void startElse();
 	void endIf();
+	void accessGlobalVariable(const std::string& name);
+	void setGlobalVariable(const std::string& name, double value);
+	void setGlobalVariable(const std::string& name, std::string value);
+	void updateGlobalVariable(const std::string& name, double value);
+	void updateGlobalVariable(const std::string& name, std::string value);
+
 	void loadInstruction(uint8_t opcode);
 };
 
