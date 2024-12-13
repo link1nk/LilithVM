@@ -1,4 +1,5 @@
 #include "LilithVM.h"
+#include "../compiler/LilithCompiler.h"
 #include <string>
 
 LilithVM::LilithVM() :
@@ -16,6 +17,11 @@ LilithValue LilithVM::exec(CodeObject* program)
 	// Set instruction pointer to the beginning
 	ip = &co->code[0];
 
+#ifdef _DEBUG
+	// Debug disassembly:
+	LilithCompiler::disassembleBytecode(co);
+#endif // _DEBUG
+
 	return eval();
 }
 
@@ -29,6 +35,11 @@ LilithValue LilithVM::execFromFile(std::string file)
 	// Set instruction pointer to the beginning
 	ip = &co->code[0];
 
+#ifdef _DEBUG
+	// Debug disassembly:
+	LilithCompiler::disassembleBytecode(co);
+#endif // _DEBUG
+
 	return eval();
 }
 
@@ -37,10 +48,6 @@ LilithValue LilithVM::eval()
 	for (;;)
 	{
 		auto opcode{ READ_BYTE() };
-
-#ifdef _DEBUG
-		log(opcode);
-#endif // _DEBUG
 
 		switch (opcode)
 		{

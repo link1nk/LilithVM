@@ -10,6 +10,9 @@
     <Filter Include="compiler">
       <UniqueIdentifier>{f3af740a-1167-4c4f-bbc3-e03384e70d44}</UniqueIdentifier>
     </Filter>
+    <Filter Include="disassembler">
+      <UniqueIdentifier>{12606197-6bcf-4f03-ab6d-c9d57c747bde}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Source.cpp" />
@@ -24,6 +27,9 @@
     </ClCompile>
     <ClCompile Include="bytecode\LilithFile.cpp">
       <Filter>bytecode</Filter>
+    </ClCompile>
+    <ClCompile Include="disassembler\LilithDisassembler.cpp">
+      <Filter>disassembler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -44,6 +50,9 @@
     </ClInclude>
     <ClInclude Include="bytecode\LilithFile.h">
       <Filter>bytecode</Filter>
+    </ClInclude>
+    <ClInclude Include="disassembler\LilithDisassembler.h">
+      <Filter>disassembler</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

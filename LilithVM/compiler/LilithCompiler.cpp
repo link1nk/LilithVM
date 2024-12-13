@@ -3,6 +3,9 @@
 std::map<std::string, uint8_t> LilithCompiler::compareOps
 { {"<", 0}, {">", 1}, {"==", 2}, {">=", 3}, {"<=", 4}, {"!=", 5} };
 
+std::unique_ptr<LilithDisassembler> LilithCompiler::disassembler
+{ std::make_unique<LilithDisassembler>() };
+
 void LilithCompiler::emit(uint8_t code)
 {
     co->code.push_back(code);
@@ -67,6 +70,11 @@ CodeObject* LilithCompiler::compile(std::string file)
     LilithFileWriter::writeToFile(file, codes);
 
     return co;
+}
+
+void LilithCompiler::disassembleBytecode(CodeObject* co)
+{
+    disassembler->disassemble(co);
 }
 
 void LilithCompiler::loadConst(double constant)

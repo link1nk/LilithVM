@@ -7,6 +7,7 @@
 #include "../vm/LilithValue.h"
 #include "../bytecode/OpCode.h"
 #include "../bytecode/LilithFile.h"
+#include "../disassembler/LilithDisassembler.h"
 
 #define ALLOC_CONST(tester, converter, allocator, value)    \
 	{                                                       \
@@ -27,8 +28,9 @@
 class LilithCompiler
 {
 private:
-	CodeObject* co;                                        // Compiling code object
+	CodeObject* co;                                           // Compiling code object
 	static std::map<std::string, uint8_t> compareOps;      
+	static std::unique_ptr<LilithDisassembler> disassembler;  // Disassembler
 
 	struct IfElseBlock
 	{
@@ -53,6 +55,8 @@ public:
 
 	CodeObject* compile();
 	CodeObject* compile(std::string file);
+
+	static void disassembleBytecode(CodeObject* co);
 
 	void loadConst(double constant);
 	void loadConst(std::string constant);

@@ -133,6 +133,7 @@
   <ItemGroup>
     <ClCompile Include="bytecode\LilithFile.cpp" />
     <ClCompile Include="compiler\LilithCompiler.cpp" />
+    <ClCompile Include="disassembler\LilithDisassembler.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="vm\LilithValue.cpp" />
     <ClCompile Include="vm\LilithVM.cpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="bytecode\LilithFile.h" />
     <ClInclude Include="bytecode\OpCode.h" />
     <ClInclude Include="compiler\LilithCompiler.h" />
+    <ClInclude Include="disassembler\LilithDisassembler.h" />
     <ClInclude Include="vm\LilithValue.h" />
     <ClInclude Include="vm\LilithVM.h" />
     <ClInclude Include="vm\Logger.h" />

@@ -43,6 +43,8 @@ int main(void)
 
 	auto result = llvm.execFromFile("if.llt");
 
+	std::cout << std::endl;
+
 	log(result);
 
 	return 0;
