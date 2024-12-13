@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <stack>
 #include "../vm/LilithValue.h"
 #include "../bytecode/OpCode.h"
 #include "../bytecode/LilithFile.h"
@@ -29,11 +30,16 @@ private:
 	CodeObject* co;                                        // Compiling code object
 	static std::map<std::string, uint8_t> compareOps;      
 
-	size_t elseJmpAddr;
-	size_t endAddr;
-	size_t elseBranchAddr;
-	size_t endBranchAddr;
-													       
+	struct IfElseBlock
+	{
+		size_t elseJmpAddr;
+		size_t endAddr;
+		size_t elseBranchAddr;
+		size_t endBranchAddr;
+	};
+
+	std::stack<IfElseBlock> ifElseStack;
+					       
 	void emit(uint8_t code);                               // Emits data to the bytecode
 	size_t numericConstIdx(double value);                  // Allocates a numeric constant
 	size_t numericConstIdx(std::string value);             // Allocates a string constant
@@ -52,10 +58,9 @@ public:
 	void loadConst(std::string constant);
 	void loadBoolean(bool boolean);
 	void loadCompare(std::string op);
-	void loadIf();
-	void loadIf(std::string op);
-	void loadElse();
-	void commitIf();
+	void startIf(std::string op);
+	void startElse();
+	void endIf();
 	void loadInstruction(uint8_t opcode);
 };
 

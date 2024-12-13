@@ -8,22 +8,32 @@ int main(void)
 
 	LilithCompiler compiler;
 
-	compiler.loadConst(6);
+	compiler.loadConst(7);
 	compiler.loadConst(6);
 	
-	compiler.loadIf("==");
+	compiler.startIf("!=");
 
 	compiler.loadConst("Lincoln ");
 	compiler.loadConst("Dias");
 	compiler.loadInstruction(OP_ADD);
 
-	compiler.loadElse();
+
+	compiler.loadConst(6);
+	compiler.loadConst(6);
+	compiler.startIf("==");
+	compiler.loadConst(10);
+	compiler.startElse();
+	compiler.loadConst(20);
+	compiler.endIf();
+
+
+	compiler.startElse();
 
 	compiler.loadConst(1);
 	compiler.loadConst(1);
 	compiler.loadInstruction(OP_ADD);
 
-	compiler.commitIf();
+	compiler.endIf();
 	
 	compiler.compile("if.llt");
 

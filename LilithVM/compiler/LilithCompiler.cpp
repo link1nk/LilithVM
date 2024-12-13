@@ -93,46 +93,48 @@ void LilithCompiler::loadCompare(std::string op)
     emit(compareOps[op]);
 }
 
-void LilithCompiler::loadIf()
+void LilithCompiler::startIf(std::string op)
 {
+    if (!op.empty()) {
+        loadCompare(op);
+    }
     emit(OP_JMP_IF_FALSE);
-
     emit(0xaa);
     emit(0xbb);
 
-    elseJmpAddr = getOffset() - 2;
+    IfElseBlock block;
+    block.elseJmpAddr = getOffset() - 2;
+    ifElseStack.push(block);
 }
 
-void LilithCompiler::loadIf(std::string op)
-{
-    loadCompare(op);
-
-    emit(OP_JMP_IF_FALSE);
-
-    emit(0xaa);
-    emit(0xbb);
-
-    elseJmpAddr = getOffset() - 2;
-}
-
-void LilithCompiler::loadElse()
+void LilithCompiler::startElse()
 {
     emit(OP_JMP);
-
     emit(0xcc);
     emit(0xdd);
 
-    endAddr = getOffset() - 2;
+    if (ifElseStack.empty()) {
+        throw std::runtime_error("Mismatched 'else': no corresponding 'if' block.");
+    }
 
-    elseBranchAddr = getOffset();
+    auto& block = ifElseStack.top();
+    block.endAddr = getOffset() - 2;
+    block.elseBranchAddr = getOffset();
+
+    patchJumpAddress(block.elseJmpAddr, block.elseBranchAddr);
 }
 
-void LilithCompiler::commitIf()
+void LilithCompiler::endIf()
 {
-    patchJumpAddress(elseJmpAddr, elseBranchAddr);
+    if (ifElseStack.empty()) {
+        throw std::runtime_error("Mismatched 'endIf': no corresponding 'if' block.");
+    }
 
-    endBranchAddr = getOffset();
-    patchJumpAddress(endAddr, endBranchAddr);
+    auto block = ifElseStack.top();
+    ifElseStack.pop();
+
+    block.endBranchAddr = getOffset();
+    patchJumpAddress(block.endAddr, block.endBranchAddr);
 }
 
 void LilithCompiler::loadInstruction(uint8_t opcode)
