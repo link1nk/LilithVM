@@ -1,44 +1,53 @@
 #include "LilithFile.h"
 
+// Writes a constant value to the file in a serialized format.
 void LilithFileWriter::writeConstant(std::ofstream& file, const LilithValue& value)
 {
     file.write(reinterpret_cast<const char*>(&value.type), sizeof(value.type));
     switch (value.type)
     {
+    // Writes a numeric constant.
     case LilithValueType::NUMBER:
         file.write(reinterpret_cast<const char*>(&value.number), sizeof(value.number));
         break;
-    case LilithValueType::OBJECT:
+
+    // Handles objects such as strings and code objects.
+    case LilithValueType::OBJECT: 
     {
         ObjectType objectType = value.object->type;
         file.write(reinterpret_cast<const char*>(&objectType), sizeof(objectType));
 
         switch (objectType)
         {
-        case ObjectType::STRING:
+        // Serializes a string object.
+        case ObjectType::STRING: 
         {
             auto stringObject = static_cast<StringObject*>(value.object);
-            writeString(file, stringObject->string); 
+            writeString(file, stringObject->string);
         }
         break;
 
-        case ObjectType::CODE:
+        // Serializes a code object.
+        case ObjectType::CODE: 
         {
             auto codeObject = static_cast<CodeObject*>(value.object);
             writeString(file, codeObject->name);
-            writeVector(file, codeObject->code); 
+            writeVector(file, codeObject->code);
             writeVectorConstants(file, codeObject->constants);
         }
         break;
         }
     }
     break;
-    case LilithValueType::BOOLEAN:
+
+    // Writes a boolean constant.
+    case LilithValueType::BOOLEAN: 
         file.write(reinterpret_cast<const char*>(&value.boolean), sizeof(value.boolean));
         break;
     }
 }
 
+// Writes a string to the file with its length and content.
 void LilithFileWriter::writeString(std::ofstream& file, const std::string& str)
 {
     size_t length = str.size();
@@ -46,6 +55,7 @@ void LilithFileWriter::writeString(std::ofstream& file, const std::string& str)
     file.write(str.data(), length);
 }
 
+// Writes a vector of bytes to the file.
 void LilithFileWriter::writeVector(std::ofstream& file, const std::vector<uint8_t>& vec)
 {
     size_t size = vec.size();
@@ -53,6 +63,7 @@ void LilithFileWriter::writeVector(std::ofstream& file, const std::vector<uint8_
     file.write(reinterpret_cast<const char*>(vec.data()), size);
 }
 
+// Writes a vector of constants (LilithValue) to the file.
 void LilithFileWriter::writeVectorConstants(std::ofstream& file, const std::vector<LilithValue>& constants)
 {
     size_t count = constants.size();
@@ -63,7 +74,37 @@ void LilithFileWriter::writeVectorConstants(std::ofstream& file, const std::vect
     }
 }
 
-void LilithFileWriter::writeToFile(const std::string& fileName, const std::vector<CodeObject*>& codeObjects)
+// Writes a single LilithValue to the file, including its type and data.
+void LilithFileWriter::writeLilithValue(std::ofstream& file, const LilithValue& value)
+{
+    file.write(reinterpret_cast<const char*>(&value.type), sizeof(value.type));
+
+    switch (value.type)
+    {
+    // Handles numeric values.
+    case LilithValueType::NUMBER: 
+        file.write(reinterpret_cast<const char*>(&value.number), sizeof(value.number));
+        break;
+
+    // Handles object types.
+    case LilithValueType::OBJECT: 
+        file.write(reinterpret_cast<const char*>(&value.object->type), sizeof(value.object->type));
+        if (value.object->type == ObjectType::STRING) // Writes string objects.
+        {
+            auto* strObj = static_cast<StringObject*>(value.object);
+            writeString(file, strObj->string);
+        }
+        break;
+
+    // Handles boolean values.
+    case LilithValueType::BOOLEAN: 
+        file.write(reinterpret_cast<const char*>(&value.boolean), sizeof(value.boolean));
+        break;
+    }
+}
+
+// Serializes and writes CodeObjects and global variables to a file.
+void LilithFileWriter::writeToFile(const std::string& fileName, const std::vector<CodeObject*>& codeObjects, const Global& global)
 {
     std::ofstream file(fileName, std::ios::binary);
     if (!file.is_open())
@@ -71,41 +112,60 @@ void LilithFileWriter::writeToFile(const std::string& fileName, const std::vecto
         throw std::runtime_error("Failed to open file for writing: " + fileName);
     }
 
+    // Write the number of CodeObjects.
     size_t codeObjectCount = codeObjects.size();
     file.write(reinterpret_cast<const char*>(&codeObjectCount), sizeof(codeObjectCount));
 
+    // Serialize each CodeObject.
     for (const auto* codeObject : codeObjects)
     {
-        writeString(file, codeObject->name);  
-        writeVector(file, codeObject->code); 
+        writeString(file, codeObject->name);
+        writeVector(file, codeObject->code);
         writeVectorConstants(file, codeObject->constants);
+    }
+
+    // Write global variables.
+    const auto& globals = global.getGlobals();
+    size_t globalCount = globals.size();
+    file.write(reinterpret_cast<const char*>(&globalCount), sizeof(globalCount));
+
+    for (const auto& globalVar : globals)
+    {
+        writeString(file, globalVar.name);       // Serialize variable name.
+        writeLilithValue(file, globalVar.value); // Serialize variable value.
     }
 }
 
+// Reads a constant value from the file.
 LilithValue LilithFileReader::readConstant(std::ifstream& file)
 {
     LilithValue value;
     file.read(reinterpret_cast<char*>(&value.type), sizeof(value.type));
     switch (value.type)
     {
-    case LilithValueType::NUMBER:
+    // Reads a numeric constant.
+    case LilithValueType::NUMBER: 
         file.read(reinterpret_cast<char*>(&value.number), sizeof(value.number));
         break;
-    case LilithValueType::OBJECT:
+
+    // Reads an object (string or code).
+    case LilithValueType::OBJECT: 
     {
         ObjectType objectType;
         file.read(reinterpret_cast<char*>(&objectType), sizeof(objectType));
 
         switch (objectType)
         {
-        case ObjectType::STRING:
+        // Reads a string object.
+        case ObjectType::STRING: 
         {
             auto str = readString(file);
             value.object = new StringObject(str);
         }
         break;
 
-        case ObjectType::CODE:
+        // Reads a code object.
+        case ObjectType::CODE: 
         {
             auto name = readString(file);
             auto code = readVector(file);
@@ -119,13 +179,16 @@ LilithValue LilithFileReader::readConstant(std::ifstream& file)
         }
     }
     break;
-    case LilithValueType::BOOLEAN:
+
+    // Reads a boolean constant.
+    case LilithValueType::BOOLEAN: 
         file.read(reinterpret_cast<char*>(&value.boolean), sizeof(value.boolean));
         break;
     }
     return value;
 }
 
+// Reads a string from the file by first reading its length.
 std::string LilithFileReader::readString(std::ifstream& file)
 {
     size_t length;
@@ -135,6 +198,7 @@ std::string LilithFileReader::readString(std::ifstream& file)
     return str;
 }
 
+// Reads a vector of bytes from the file.
 std::vector<uint8_t> LilithFileReader::readVector(std::ifstream& file)
 {
     size_t size;
@@ -144,6 +208,7 @@ std::vector<uint8_t> LilithFileReader::readVector(std::ifstream& file)
     return vec;
 }
 
+// Reads a vector of constants (LilithValue) from the file.
 std::vector<LilithValue> LilithFileReader::readVectorConstants(std::ifstream& file)
 {
     size_t count;
@@ -156,7 +221,43 @@ std::vector<LilithValue> LilithFileReader::readVectorConstants(std::ifstream& fi
     return constants;
 }
 
-std::vector<CodeObject*> LilithFileReader::readFromFile(const std::string& fileName)
+// Reads a single LilithValue from the file.
+LilithValue LilithFileReader::readLilithValue(std::ifstream& file)
+{
+    LilithValue value;
+    file.read(reinterpret_cast<char*>(&value.type), sizeof(value.type));
+
+    switch (value.type)
+    {
+    // Reads a numeric value.
+    case LilithValueType::NUMBER: 
+        file.read(reinterpret_cast<char*>(&value.number), sizeof(value.number));
+        break;
+
+    // Reads an object type.
+    case LilithValueType::OBJECT: 
+        ObjectType objType;
+        file.read(reinterpret_cast<char*>(&objType), sizeof(objType));
+
+        // Reads a string object.
+        if (objType == ObjectType::STRING) 
+        {
+            auto str = readString(file);
+            value.object = new StringObject(str);
+        }
+        break;
+
+    // Reads a boolean value.
+    case LilithValueType::BOOLEAN: 
+        file.read(reinterpret_cast<char*>(&value.boolean), sizeof(value.boolean));
+        break;
+    }
+
+    return value;
+}
+
+// Reads CodeObjects and global variables from a file.
+std::pair<std::vector<CodeObject*>, Global> LilithFileReader::readFromFile(const std::string& fileName)
 {
     std::ifstream file(fileName, std::ios::binary);
     if (!file.is_open())
@@ -170,6 +271,7 @@ std::vector<CodeObject*> LilithFileReader::readFromFile(const std::string& fileN
     std::vector<CodeObject*> codeObjects;
     codeObjects.reserve(codeObjectCount);
 
+    // Deserialize each CodeObject.
     for (size_t i = 0; i < codeObjectCount; ++i)
     {
         auto name = readString(file);
@@ -183,5 +285,18 @@ std::vector<CodeObject*> LilithFileReader::readFromFile(const std::string& fileN
         codeObjects.push_back(codeObject);
     }
 
-    return codeObjects;
+    Global global;
+    size_t globalCount;
+    file.read(reinterpret_cast<char*>(&globalCount), sizeof(globalCount));
+
+    // Deserialize global variables.
+    for (size_t i = 0; i < globalCount; ++i)
+    {
+        auto name = readString(file);
+        auto value = readLilithValue(file);
+        global.define(name);
+        global.set(global.getGlobalIndex(name), value);
+    }
+
+    return { std::move(codeObjects), std::move(global) };
 }

@@ -58,6 +58,8 @@ public:
 	CodeObject* compile();
 	CodeObject* compile(std::string file);
 
+	void setGlobal(std::shared_ptr<Global> global);
+
 	void disassembleBytecode(CodeObject* co);
 
 	void loadConst(double constant);

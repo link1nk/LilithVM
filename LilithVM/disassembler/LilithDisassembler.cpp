@@ -154,3 +154,8 @@ void LilithDisassembler::disassemble(CodeObject* co)
 		std::cout << "\n";
 	}
 }
+
+void LilithDisassembler::setGlobal(std::shared_ptr<Global> global)
+{
+	this->global = global;
+}

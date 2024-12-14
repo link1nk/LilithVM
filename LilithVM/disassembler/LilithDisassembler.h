@@ -30,6 +30,7 @@ public:
 	LilithDisassembler(std::shared_ptr<Global> global);
 
 	void disassemble(CodeObject* co);                               // Disassembles a code unit
+	void setGlobal(std::shared_ptr<Global> global);
 };
 
 #endif // LilithDisassembler_H

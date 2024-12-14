@@ -28,19 +28,29 @@ LilithValue LilithVM::exec(CodeObject* program)
 
 LilithValue LilithVM::execFromFile(std::string file)
 {
-	co = LilithFileReader::readFromFile(file)[0];
+	// Loads the CodeObject and global variables
+	auto [codeObjects, loadedGlobal] = LilithFileReader::readFromFile(file);
 
-	// Init the stack
+	// Assigns the first CodeObject as the entry point
+	co = codeObjects[0];
+
+	// Sets global variables
+	global = std::make_shared<Global>(std::move(loadedGlobal));
+
+	// Initialize the stack
 	sp = &stack[0];
 
-	// Set instruction pointer to the beginning
+	// Sets the instruction pointer to the beginning of the code
 	ip = &co->code[0];
 
+	compiler->setGlobal(global);
+
 #ifdef _DEBUG
-	// Debug disassembly:
+	// Debug do bytecode
 	compiler->disassembleBytecode(co);
 #endif // _DEBUG
 
+	// Executa o código
 	return eval();
 }
 
@@ -220,5 +230,5 @@ LilithValue LilithVM::peek(size_t offset)
 void LilithVM::setGlobalVariables()
 {
 	global->addConst("x", 10);
-	global->addConst("y", 10);
+	global->addConst("y", 50);
 }

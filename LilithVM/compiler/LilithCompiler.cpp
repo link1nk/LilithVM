@@ -31,6 +31,10 @@ size_t LilithCompiler::getOffset()
     return co->code.size();
 }
 
+#ifdef _MSC_VER
+    #pragma warning(push)
+    #pragma warning(disable: 4333)
+#endif
 void LilithCompiler::patchJumpAddress(size_t offset, uint16_t value)
 {
     writeByteAtOffset(offset, (value >> 24) & 0xff);
@@ -38,6 +42,9 @@ void LilithCompiler::patchJumpAddress(size_t offset, uint16_t value)
     writeByteAtOffset(offset + 2, (value >> 8) & 0xff);
     writeByteAtOffset(offset + 3, value & 0xff);
 }
+#ifdef _MSC_VER
+    #pragma warning(pop)
+#endif
 
 void LilithCompiler::writeByteAtOffset(size_t offset, uint8_t value)
 {
@@ -67,9 +74,15 @@ CodeObject* LilithCompiler::compile(std::string file)
 
     std::vector<CodeObject*> codes = { co };
 
-    LilithFileWriter::writeToFile(file, codes);
+    LilithFileWriter::writeToFile(file, codes, *global);
 
     return co;
+}
+
+void LilithCompiler::setGlobal(std::shared_ptr<Global> global)
+{
+    this->global = global;
+    disassembler->setGlobal(global);
 }
 
 void LilithCompiler::disassembleBytecode(CodeObject* co)
@@ -77,6 +90,10 @@ void LilithCompiler::disassembleBytecode(CodeObject* co)
     disassembler->disassemble(co);
 }
 
+#ifdef _MSC_VER
+    #pragma warning(push)
+    #pragma warning(disable: 4267)
+#endif
 void LilithCompiler::loadConst(double constant)
 {
     emit(OP_CONST);
@@ -148,6 +165,9 @@ void LilithCompiler::endIf()
     block.endBranchAddr = getOffset();
     patchJumpAddress(block.endAddr, block.endBranchAddr);
 }
+#ifdef _MSC_VER
+    #pragma warning(pop)
+#endif
 
 void LilithCompiler::accessGlobalVariable(const std::string& name)
 {
