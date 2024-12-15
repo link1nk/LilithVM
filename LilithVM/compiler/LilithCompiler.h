@@ -42,14 +42,22 @@ private:
 		size_t endBranchAddr;
 	};
 
+	struct WhileBlock
+	{
+		size_t loopStartAddr;
+		size_t loopEndJmpAddr;
+		size_t loopEndAddr;
+	};
+
 	std::stack<IfElseBlock> ifElseStack;
-					       
+	std::stack<WhileBlock> whileStack;
+
 	void emit(uint8_t code);                               // Emits data to the bytecode
 	size_t numericConstIdx(double value);                  // Allocates a numeric constant
 	size_t numericConstIdx(std::string value);             // Allocates a string constant
 	size_t booleanConstIdx(bool value);                    // Allocates a boolean constant
 	size_t getOffset();                                    // Returns current bytecode offset
-	void patchJumpAddress(size_t offset, uint16_t value);  // Patches jump address
+	void patchJumpAddress(size_t offset, uint32_t value);  // Patches jump address
 	void writeByteAtOffset(size_t offset, uint8_t value);  // Writes byte at offset
 	bool isGlobalScope();                                  // Whether its the global scope
 	size_t getVarsCountOnScopeExit();                      // Number of local vars in this scope
@@ -79,6 +87,9 @@ public:
 	void updateVariable(const std::string& name, std::string value);
 	void startBlock();
 	void endBlock();
+	void initWhile();
+	void setWhileCondition(const std::string& op);
+	void endWhile();
 	void loadInstruction(uint8_t opcode);
 };
 

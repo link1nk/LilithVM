@@ -35,7 +35,7 @@ size_t LilithCompiler::getOffset()
     #pragma warning(push)
     #pragma warning(disable: 4333)
 #endif
-void LilithCompiler::patchJumpAddress(size_t offset, uint16_t value)
+void LilithCompiler::patchJumpAddress(size_t offset, uint32_t value)
 {
     writeByteAtOffset(offset, (value >> 24) & 0xff);
     writeByteAtOffset(offset + 1, (value >> 16) & 0xff);
@@ -48,6 +48,7 @@ void LilithCompiler::patchJumpAddress(size_t offset, uint16_t value)
 
 void LilithCompiler::writeByteAtOffset(size_t offset, uint8_t value)
 {
+    std::cout << "writing: " << offset << " value -> " << (int)value << '\n';
     co->code[offset] = value;
 }
 
@@ -150,7 +151,8 @@ void LilithCompiler::loadCompare(std::string op)
 
 void LilithCompiler::startIf(std::string op)
 {
-    if (!op.empty()) {
+    if (!op.empty())
+    {
         loadCompare(op);
     }
     emit(OP_JMP_IF_FALSE);
@@ -230,6 +232,8 @@ void LilithCompiler::setVariable(const std::string& name, double value)
 
         emit(OP_SET_GLOBAL);
         emit(global->getGlobalIndex(name));
+
+        emit(OP_POP);
     }
     else
     {
@@ -250,6 +254,8 @@ void LilithCompiler::setVariable(const std::string& name, std::string value)
 
         emit(OP_SET_GLOBAL);
         emit(global->getGlobalIndex(name));
+
+        emit(OP_POP);
     }
     else
     {
@@ -280,6 +286,8 @@ void LilithCompiler::updateVariable(const std::string& name)
 
         emit(OP_SET_GLOBAL);
         emit(globalIndex);
+
+        emit(OP_POP);
     }
 }
 
@@ -305,6 +313,8 @@ void LilithCompiler::updateVariable(const std::string& name, double value)
 
         emit(OP_SET_GLOBAL);
         emit(globalIndex);
+
+        emit(OP_POP);
     }
 }
 
@@ -330,6 +340,8 @@ void LilithCompiler::updateVariable(const std::string& name, std::string value)
 
         emit(OP_SET_GLOBAL);
         emit(globalIndex);
+
+        emit(OP_POP);
     }
 }
 
@@ -349,6 +361,52 @@ void LilithCompiler::endBlock()
     }
 
     co->scopeLevel--;
+}
+
+void LilithCompiler::initWhile()
+{
+    WhileBlock block;
+    block.loopStartAddr = getOffset();
+
+    whileStack.push(block);
+}
+
+void LilithCompiler::setWhileCondition(const std::string& op)
+{
+    if (!op.empty())
+    {
+        loadCompare(op);
+    }
+
+    emit(OP_JMP_IF_FALSE);
+    emit(0);
+    emit(0);
+    emit(0);
+    emit(0);
+
+    auto& block = whileStack.top();
+    block.loopEndJmpAddr = getOffset() - 4;
+}
+
+void LilithCompiler::endWhile()
+{
+    emit(OP_JMP);
+    emit(0);
+    emit(0);
+    emit(0);
+    emit(0);
+
+    auto& block = whileStack.top();
+
+    size_t jumpToStartOffset = getOffset(); 
+    patchJumpAddress(getOffset() - 4, block.loopStartAddr); 
+
+    std::cout << "here\n";
+
+    block.loopEndAddr = getOffset();
+    patchJumpAddress(block.loopEndJmpAddr, block.loopEndAddr); 
+
+    whileStack.pop(); 
 }
 
 void LilithCompiler::loadInstruction(uint8_t opcode)

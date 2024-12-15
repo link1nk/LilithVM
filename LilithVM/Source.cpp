@@ -5,14 +5,32 @@ int main(void)
 {
 	LilithVM llvm;
 
-	llvm.compiler->setVariable("x", 5);
+	llvm.compiler->setVariable("i", 10);
+	llvm.compiler->setVariable("count", 0);
+
+	llvm.compiler->initWhile();
+	llvm.compiler->accessVariable("i");
+	llvm.compiler->accessVariable("count");
+	llvm.compiler->setWhileCondition(">");
 
 	llvm.compiler->startBlock();
-	llvm.compiler->setVariable("x", 10);
+	
+	llvm.compiler->accessVariable("i");
+	llvm.compiler->loadConst(1);
+	llvm.compiler->loadInstruction(OP_SUB);
+	llvm.compiler->updateVariable("i");
+
+	llvm.compiler->accessVariable("count");
+	llvm.compiler->loadConst(1);
+	llvm.compiler->loadInstruction(OP_ADD);
+	llvm.compiler->updateVariable("count");
+
 	llvm.compiler->endBlock();
 
-	llvm.compiler->accessVariable("x");
-	
+	llvm.compiler->endWhile();
+
+	llvm.compiler->accessVariable("count");
+
 	//llvm.compiler->compile("execute.llt");
 
 	auto result = llvm.exec(llvm.compiler->compile());

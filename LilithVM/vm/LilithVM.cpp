@@ -248,7 +248,10 @@ LilithValue LilithVM::eval()
 			DIE << "Unknow opcode: " << std::hex << opcode;
 		}
 		}
+
+#ifdef _DEBUG
 		dumpStack();
+#endif // _DEBUG
 	}
 }
 
