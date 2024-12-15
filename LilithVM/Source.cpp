@@ -5,26 +5,17 @@ int main(void)
 {
 	LilithVM llvm;
 
-	llvm.compiler->loadConst(6);
-	llvm.compiler->loadConst(6);
+	llvm.compiler->setVariable("x", 5);
+
+	llvm.compiler->startBlock();
+	llvm.compiler->setVariable("x", 10);
+	llvm.compiler->endBlock();
+
+	llvm.compiler->accessVariable("x");
 	
-	llvm.compiler->startIf("!=");
+	//llvm.compiler->compile("execute.llt");
 
-	llvm.compiler->setGlobalVariable("lilith1", 20);
-	llvm.compiler->accessGlobalVariable("x");
-	llvm.compiler->loadInstruction(OP_ADD);
-
-	llvm.compiler->startElse();
-
-	llvm.compiler->setGlobalVariable("lilith2", 10);
-	llvm.compiler->accessGlobalVariable("y");
-	llvm.compiler->loadInstruction(OP_ADD);
-
-	llvm.compiler->endIf();
-	
-	llvm.compiler->compile("execute.llt");
-
-	auto result = llvm.execFromFile("execute.llt");
+	auto result = llvm.exec(llvm.compiler->compile());
 
 	std::cout << std::endl;
 

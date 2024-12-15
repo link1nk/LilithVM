@@ -24,6 +24,8 @@ private:
 	size_t disassembleCompare(CodeObject* co, uint8_t opcode, size_t offset);
 	size_t disassembleJump(CodeObject* co, uint8_t opcode, size_t offset);
 	size_t disassembleGlobal(CodeObject* co, uint8_t opcode, size_t offset);
+	size_t disassembleLocal(CodeObject* co, uint8_t opcode, size_t offset);
+	size_t disassembleWord(CodeObject* co, uint8_t opcode, size_t offset);
 	uint32_t readDwordOffset(CodeObject* co, size_t offset);
 
 public:

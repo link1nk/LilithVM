@@ -51,6 +51,8 @@ private:
 	size_t getOffset();                                    // Returns current bytecode offset
 	void patchJumpAddress(size_t offset, uint16_t value);  // Patches jump address
 	void writeByteAtOffset(size_t offset, uint8_t value);  // Writes byte at offset
+	bool isGlobalScope();                                  // Whether its the global scope
+	size_t getVarsCountOnScopeExit();                      // Number of local vars in this scope
 
 public:
 	LilithCompiler(std::shared_ptr<Global> global);
@@ -69,12 +71,14 @@ public:
 	void startIf(std::string op);
 	void startElse();
 	void endIf();
-	void accessGlobalVariable(const std::string& name);
-	void setGlobalVariable(const std::string& name, double value);
-	void setGlobalVariable(const std::string& name, std::string value);
-	void updateGlobalVariable(const std::string& name, double value);
-	void updateGlobalVariable(const std::string& name, std::string value);
-
+	void accessVariable(const std::string& name);
+	void setVariable(const std::string& name, double value);
+	void setVariable(const std::string& name, std::string value);
+	void updateVariable(const std::string& name);
+	void updateVariable(const std::string& name, double value);
+	void updateVariable(const std::string& name, std::string value);
+	void startBlock();
+	void endBlock();
 	void loadInstruction(uint8_t opcode);
 };
 

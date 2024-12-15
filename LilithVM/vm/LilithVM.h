@@ -88,15 +88,19 @@ private:
 	CodeObject* co;                                // Code object
 	std::array<LilithValue, STACK_LIMIT> stack;    // Operands stack
 	uint8_t* ip;                                   // Instruction pointer
-	LilithValue* sp;                               // Stack 
+	LilithValue* sp;                               // Stack Pointer 
+	LilithValue* bp;                               // Base Pointer
 
 	std::shared_ptr<Global> global;                // Global object
 
 	LilithValue eval();                            // Main eval loop
 	void push(const LilithValue& value);           // Pushes a value onto the stack
 	LilithValue pop();                             // Pops a value from the stack
+	void popN(size_t count);                       // Pops multiple values from the stack
 	LilithValue peek(size_t offset = 0);           // Peeks an element from the stack
 	void setGlobalVariables();                     // Sets up global variables and functions
+	void dumpStack();                              // Dumps current stack
+
 
 public:
 	std::unique_ptr<LilithCompiler> compiler;      // Compiler

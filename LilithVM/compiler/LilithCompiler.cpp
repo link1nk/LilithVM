@@ -51,16 +51,44 @@ void LilithCompiler::writeByteAtOffset(size_t offset, uint8_t value)
     co->code[offset] = value;
 }
 
+bool LilithCompiler::isGlobalScope()
+{
+    return co->scopeLevel == 1 && co->name == "main";
+}
+
+size_t LilithCompiler::getVarsCountOnScopeExit()
+{
+    auto varsCount = 0;
+
+    if (co->locals.size() > 0)
+    {
+        for (auto& e : co->locals)
+        {
+            if (e.scopeLevel == co->scopeLevel)
+            {
+                co->locals.back().name = "DELETED" + co->locals.back().name;
+                varsCount++;
+            }
+        }
+    }
+
+    return varsCount;
+}
+
 LilithCompiler::LilithCompiler(std::shared_ptr<Global> global) :
     global(global), disassembler(std::make_unique<LilithDisassembler>(global))
 {
     LilithValue llv = ALLOC_CODE("main");
 
     co = AS_CODE(llv);
+
+    startBlock();
 }
 
 CodeObject* LilithCompiler::compile()
 {
+    endBlock();
+
     emit(OP_HALT);
 
     std::vector<CodeObject*> codes = { co };
@@ -75,6 +103,8 @@ CodeObject* LilithCompiler::compile(std::string file)
     std::vector<CodeObject*> codes = { co };
 
     LilithFileWriter::writeToFile(file, codes, *global);
+
+    endBlock();
 
     return co;
 }
@@ -169,65 +199,156 @@ void LilithCompiler::endIf()
     #pragma warning(pop)
 #endif
 
-void LilithCompiler::accessGlobalVariable(const std::string& name)
+void LilithCompiler::accessVariable(const std::string& name)
 {
-    if (!global->exists(name))
+    auto localIndex = co->getLocalIndex(name);
+
+    if (localIndex != -1)
     {
-        DIE << "[LilithCompiler]: Reference Error: " << name;
+        emit(OP_GET_LOCAL);
+        emit(localIndex);
+    }
+    else
+    {
+        if (!global->exists(name))
+        {
+            DIE << "[LilithCompiler]: Reference Error: " << name;
+        }
+
+        emit(OP_GET_GLOBAL);
+        emit(global->getGlobalIndex(name));
+    }
+}
+
+void LilithCompiler::setVariable(const std::string& name, double value)
+{
+    loadConst(value);
+
+    if (isGlobalScope())
+    {
+        global->define(name);
+
+        emit(OP_SET_GLOBAL);
+        emit(global->getGlobalIndex(name));
+    }
+    else
+    {
+        co->addLocal(name);
+        emit(OP_SET_LOCAL);
+        emit(co->getLocalIndex(name));
+    }
+}
+
+void LilithCompiler::setVariable(const std::string& name, std::string value)
+{
+    loadConst(value);
+
+    if (isGlobalScope())
+    {
+
+        global->define(name);
+
+        emit(OP_SET_GLOBAL);
+        emit(global->getGlobalIndex(name));
+    }
+    else
+    {
+
+        co->addLocal(name);
+        emit(OP_SET_LOCAL);
+        emit(co->getLocalIndex(name));
+    }
+}
+
+void LilithCompiler::updateVariable(const std::string& name)
+{
+    auto localIndex = co->getLocalIndex(name);
+
+    if (localIndex != -1)
+    {
+        emit(OP_SET_LOCAL);
+        emit(localIndex);
+    }
+    else
+    {
+        auto globalIndex = global->getGlobalIndex(name);
+
+        if (globalIndex == -1)
+        {
+            DIE << "Reference error: " << name << " is not defined!";
+        }
+
+        emit(OP_SET_GLOBAL);
+        emit(globalIndex);
+    }
+}
+
+void LilithCompiler::updateVariable(const std::string& name, double value)
+{
+    loadConst(value);
+
+    auto localIndex = co->getLocalIndex(name);
+
+    if (localIndex != -1)
+    {
+        emit(OP_SET_LOCAL);
+        emit(localIndex);
+    }
+    else
+    {
+        auto globalIndex = global->getGlobalIndex(name);
+
+        if (globalIndex == -1)
+        {
+            DIE << "Reference error: " << name << " is not defined!";
+        }
+
+        emit(OP_SET_GLOBAL);
+        emit(globalIndex);
+    }
+}
+
+void LilithCompiler::updateVariable(const std::string& name, std::string value)
+{
+    loadConst(value);
+
+    auto localIndex = co->getLocalIndex(name);
+    
+    if (localIndex != -1)
+    {
+        emit(OP_SET_LOCAL);
+        emit(localIndex);
+    }
+    else
+    {
+        auto globalIndex = global->getGlobalIndex(name);
+
+        if (globalIndex == -1)
+        {
+            DIE << "Reference error: " << name << " is not defined!";
+        }
+
+        emit(OP_SET_GLOBAL);
+        emit(globalIndex);
+    }
+}
+
+void LilithCompiler::startBlock()
+{
+    co->scopeLevel++;
+}
+
+void LilithCompiler::endBlock()
+{
+    auto varsCount = getVarsCountOnScopeExit();
+
+    if (varsCount > 0)
+    {
+        emit(OP_SCOPE_EXIT);
+        emit(varsCount);
     }
 
-    emit(OP_GET_GLOBAL);
-    emit(global->getGlobalIndex(name));
-}
-
-void LilithCompiler::setGlobalVariable(const std::string& name, double value)
-{
-    loadConst(value);
-
-    global->define(name);
-
-    emit(OP_SET_GLOBAL);
-    emit(global->getGlobalIndex(name));
-}
-
-void LilithCompiler::setGlobalVariable(const std::string& name, std::string value)
-{
-    loadConst(value);
-
-    global->define(name);
-
-    emit(OP_SET_GLOBAL);
-    emit(global->getGlobalIndex(name));
-}
-
-void LilithCompiler::updateGlobalVariable(const std::string& name, double value)
-{
-    loadConst(value);
-
-    auto globalIndex = global->getGlobalIndex(name);
-
-    if (globalIndex == -1)
-    {
-        DIE << "Reference error: " << name << " is not defined!";
-    }
-
-    emit(OP_SET_GLOBAL);
-    emit(globalIndex);
-}
-
-void LilithCompiler::updateGlobalVariable(const std::string& name, std::string value)
-{
-    loadConst(value);
-
-    auto globalIndex = global->getGlobalIndex(name);
-
-    if (globalIndex == -1)
-    {
-        DIE << "Reference error: " << name << " is not defined!";
-    }
-
-    emit(OP_SET_GLOBAL);
-    emit(globalIndex);
+    co->scopeLevel--;
 }
 
 void LilithCompiler::loadInstruction(uint8_t opcode)

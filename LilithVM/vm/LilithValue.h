@@ -52,15 +52,24 @@ struct StringObject : public Object
 	{}
 };
 
+struct LocalVar
+{
+	std::string name;
+	size_t scopeLevel;
+};
+
 struct CodeObject : public Object
 {
 	std::string name;
 	std::vector<uint8_t> code;
 	std::vector<LilithValue> constants;
+	std::vector<LocalVar> locals;
+	size_t scopeLevel;
 
-	CodeObject(const std::string& name) :
-		Object(ObjectType::CODE), name(name)
-	{}
+	CodeObject(const std::string& name);
+
+	int getLocalIndex(const std::string& name);
+	void addLocal(const std::string& name);
 };
 
 // ------------------------------------------------------------------------------------------------------------------

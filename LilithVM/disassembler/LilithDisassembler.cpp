@@ -2,6 +2,7 @@
 #include "../bytecode/OpCode.h"
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
 
 std::array<std::string, 6> LilithDisassembler::inverseCompareOps
 { "<", ">", "==", ">=", "<=", "!=" };
@@ -17,6 +18,7 @@ size_t LilithDisassembler::disassembleInstruction(CodeObject* co, size_t offset)
 
 	switch (opcode)
 	{
+	case OP_POP:
 	case OP_ADD:
 	case OP_SUB:
 	case OP_DIV:
@@ -33,6 +35,11 @@ size_t LilithDisassembler::disassembleInstruction(CodeObject* co, size_t offset)
 	case OP_GET_GLOBAL:
 	case OP_SET_GLOBAL:
 		return disassembleGlobal(co, opcode, offset);
+	case OP_GET_LOCAL:
+	case OP_SET_LOCAL:
+		return disassembleLocal(co, opcode, offset);
+	case OP_SCOPE_EXIT:
+		return disassembleWord(co, opcode, offset);
 	default:
 		DIE << "disassemblyInstruction: no disassembly for "
 			<< opcodeToString(opcode);
@@ -126,6 +133,37 @@ size_t LilithDisassembler::disassembleGlobal(CodeObject* co, uint8_t opcode, siz
 
 	std::cout << (int)globalIndex << " (" << global->get(globalIndex).name << ")";
 
+	return offset + 2;
+}
+
+size_t LilithDisassembler::disassembleLocal(CodeObject* co, uint8_t opcode, size_t offset)
+{
+	dumpBytes(co, offset, 2);
+	printOpcode(opcode);
+
+	auto localIndex = co->code[offset + 1];
+
+	std::string localName = co->locals[localIndex].name;
+
+	if (localName.rfind("DELETED", 0) == 0)
+	{
+		std::cout << (int)localIndex << " (" << localName.substr(7) << ")";
+
+		co->locals.erase(co->locals.begin() + localIndex);
+	}
+	else
+	{
+		std::cout << (int)localIndex << " (" << localName << ")";
+	}
+
+	return offset + 2;
+}
+
+size_t LilithDisassembler::disassembleWord(CodeObject* co, uint8_t opcode, size_t offset)
+{
+	dumpBytes(co, offset, 2);
+	printOpcode(opcode);
+	std::cout << (int)co->code[offset + 1];
 	return offset + 2;
 }
 

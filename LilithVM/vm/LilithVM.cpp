@@ -3,7 +3,7 @@
 #include <string>
 
 LilithVM::LilithVM() :
-	co(nullptr), ip(nullptr), sp(nullptr), stack({}), global(std::make_shared<Global>()), compiler(std::make_unique<LilithCompiler>(global))
+	co(nullptr), ip(nullptr), sp(nullptr), bp(nullptr), stack({}), global(std::make_shared<Global>()), compiler(std::make_unique<LilithCompiler>(global))
 {
 	setGlobalVariables();
 }
@@ -14,6 +14,9 @@ LilithValue LilithVM::exec(CodeObject* program)
 
 	// Init the stack
 	sp = &stack[0];
+
+	// Init the base pointer
+	bp = sp;
 
 	// Set instruction pointer to the beginning
 	ip = &co->code[0];
@@ -39,6 +42,9 @@ LilithValue LilithVM::execFromFile(std::string file)
 
 	// Initialize the stack
 	sp = &stack[0];
+
+	// Init the base pointer
+	bp = sp;
 
 	// Sets the instruction pointer to the beginning of the code
 	ip = &co->code[0];
@@ -190,11 +196,59 @@ LilithValue LilithVM::eval()
 			break;
 		}
 
+		//---------------------------------------------------
+		// Stack manipulation
+		//---------------------------------------------------
+		case OP_POP:
+			pop();
+			break;
+
+		case OP_GET_LOCAL:
+		{
+			auto localIndex = READ_BYTE();
+			if (localIndex < 0 || localIndex >= stack.size())
+			{
+				DIE << "OP_GET_LOCAL: Invalid variable index: " << (int)localIndex;
+			}
+			push(bp[localIndex]);
+			break;
+		}
+			
+
+		case OP_SET_LOCAL:
+		{
+			auto localIndex = READ_BYTE();
+			if (localIndex < 0 || localIndex >= stack.size())
+			{
+				DIE << "OP_GET_LOCAL: Invalid variable index: " << (int)localIndex;
+			}
+			auto value = peek(0);
+			bp[localIndex] = value;
+			break;
+		}
+
+		case OP_SCOPE_EXIT:
+		{
+			auto count = READ_BYTE();
+
+			*(sp - 1 - count) = peek(0);
+
+			popN(count);
+
+			while (sp != bp)
+			{
+				pop();
+			}
+
+			break;
+		}
+
 		default:
 		{
 			DIE << "Unknow opcode: " << std::hex << opcode;
 		}
 		}
+		dumpStack();
 	}
 }
 
@@ -218,6 +272,16 @@ LilithValue LilithVM::pop()
 	return *sp;
 }
 
+void LilithVM::popN(size_t count)
+{
+	if (stack.size() == 0)
+	{
+		DIE << "popN(): empty stack";
+	}
+
+	sp -= count;
+}
+
 LilithValue LilithVM::peek(size_t offset)
 {
 	if (stack.size() == 0)
@@ -229,6 +293,24 @@ LilithValue LilithVM::peek(size_t offset)
 
 void LilithVM::setGlobalVariables()
 {
-	global->addConst("x", 10);
-	global->addConst("y", 50);
+	global->addConst("VERSION", 1);
+}
+
+void LilithVM::dumpStack()
+{
+	std::cout << "\n---------------------- Stack ----------------------\n";
+
+	if (sp == &stack[0])
+	{
+		std::cout << "(empty)\n";
+	}
+	auto csp = sp - 1;
+	while (csp >= &stack[0])
+	{
+		std::cout << "Address: " << (void*) csp << " -> " << *csp-- << "\n";
+	}
+	std::cout << "\n";
+
+	std::cout << "Stack Pointer -> " << (void*)(sp-1) << '\n';
+	std::cout << "Base  Pointer -> " << (void*)(bp) << '\n';
 }

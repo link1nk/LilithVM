@@ -61,3 +61,27 @@ std::ostream& operator<<(std::ostream& os, const LilithValue& lilithValue)
 	return os << "LilithValue (" << lilithValueToTypeString(lilithValue)
 		      << "); " << lilithValueToConstantString(lilithValue);
 }
+
+CodeObject::CodeObject(const std::string& name) :
+	Object(ObjectType::CODE), name(name), scopeLevel(0)
+{}
+
+int CodeObject::getLocalIndex(const std::string& name)
+{
+	if (locals.size() > 0)
+	{
+		for (auto i = (int)locals.size() - 1; i >= 0; i--)
+		{
+			if (locals[i].name == name)
+			{
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+
+void CodeObject::addLocal(const std::string& name)
+{
+	locals.push_back({ name, scopeLevel });
+}
