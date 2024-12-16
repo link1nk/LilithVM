@@ -103,7 +103,36 @@ void LilithFileWriter::writeLilithValue(std::ofstream& file, const LilithValue& 
     }
 }
 
-// Serializes and writes CodeObjects and global variables to a file.
+// Writes a CodeObject to the file, including the new attributes.
+void LilithFileWriter::writeCodeObject(std::ofstream& file, const CodeObject* codeObject)
+{
+    writeString(file, codeObject->name);
+    writeVector(file, codeObject->code);
+    writeVectorConstants(file, codeObject->constants);
+    writeVectorLocals(file, codeObject->locals);
+    file.write(reinterpret_cast<const char*>(&codeObject->scopeLevel), sizeof(codeObject->scopeLevel));
+}
+
+// Writes a vector of LocalVar to the file.
+void LilithFileWriter::writeVectorLocals(std::ofstream& file, const std::vector<LocalVar>& locals)
+{
+    size_t count = locals.size();
+    file.write(reinterpret_cast<const char*>(&count), sizeof(count));
+    for (const auto& local : locals)
+    {
+        writeLocalVar(file, local);
+    }
+}
+
+// Writes a LocalVar to the file.
+void LilithFileWriter::writeLocalVar(std::ofstream& file, const LocalVar& local)
+{
+    writeString(file, local.name);
+    file.write(reinterpret_cast<const char*>(&local.scopeLevel), sizeof(local.scopeLevel));
+}
+
+
+// Updated writeToFile to serialize the new attributes of CodeObject.
 void LilithFileWriter::writeToFile(const std::string& fileName, const std::vector<CodeObject*>& codeObjects, const Global& global)
 {
     std::ofstream file(fileName, std::ios::binary);
@@ -112,29 +141,25 @@ void LilithFileWriter::writeToFile(const std::string& fileName, const std::vecto
         throw std::runtime_error("Failed to open file for writing: " + fileName);
     }
 
-    // Write the number of CodeObjects.
     size_t codeObjectCount = codeObjects.size();
     file.write(reinterpret_cast<const char*>(&codeObjectCount), sizeof(codeObjectCount));
 
-    // Serialize each CodeObject.
     for (const auto* codeObject : codeObjects)
     {
-        writeString(file, codeObject->name);
-        writeVector(file, codeObject->code);
-        writeVectorConstants(file, codeObject->constants);
+        writeCodeObject(file, codeObject);
     }
 
-    // Write global variables.
     const auto& globals = global.getGlobals();
     size_t globalCount = globals.size();
     file.write(reinterpret_cast<const char*>(&globalCount), sizeof(globalCount));
 
     for (const auto& globalVar : globals)
     {
-        writeString(file, globalVar.name);       // Serialize variable name.
-        writeLilithValue(file, globalVar.value); // Serialize variable value.
+        writeString(file, globalVar.name);
+        writeLilithValue(file, globalVar.value);
     }
 }
+
 
 // Reads a constant value from the file.
 LilithValue LilithFileReader::readConstant(std::ifstream& file)
@@ -256,7 +281,48 @@ LilithValue LilithFileReader::readLilithValue(std::ifstream& file)
     return value;
 }
 
-// Reads CodeObjects and global variables from a file.
+// Reads a CodeObject from the file, including the new attributes.
+CodeObject* LilithFileReader::readCodeObject(std::ifstream& file)
+{
+    auto name = readString(file);
+    auto code = readVector(file);
+    auto constants = readVectorConstants(file);
+    auto locals = readVectorLocals(file);
+    size_t scopeLevel;
+    file.read(reinterpret_cast<char*>(&scopeLevel), sizeof(scopeLevel));
+
+    auto* codeObject = new CodeObject(name);
+    codeObject->code = std::move(code);
+    codeObject->constants = std::move(constants);
+    codeObject->locals = std::move(locals);
+    codeObject->scopeLevel = scopeLevel;
+
+    return codeObject;
+}
+
+// Reads a vector of LocalVar from the file.
+std::vector<LocalVar> LilithFileReader::readVectorLocals(std::ifstream& file)
+{
+    size_t count;
+    file.read(reinterpret_cast<char*>(&count), sizeof(count));
+    std::vector<LocalVar> locals(count);
+    for (auto& local : locals)
+    {
+        local = readLocalVar(file);
+    }
+    return locals;
+}
+
+// Reads a LocalVar from the file.
+LocalVar LilithFileReader::readLocalVar(std::ifstream& file)
+{
+    LocalVar local;
+    local.name = readString(file);
+    file.read(reinterpret_cast<char*>(&local.scopeLevel), sizeof(local.scopeLevel));
+    return local;
+}
+
+// Updated readFromFile to deserialize the new attributes of CodeObject.
 std::pair<std::vector<CodeObject*>, Global> LilithFileReader::readFromFile(const std::string& fileName)
 {
     std::ifstream file(fileName, std::ios::binary);
@@ -271,25 +337,15 @@ std::pair<std::vector<CodeObject*>, Global> LilithFileReader::readFromFile(const
     std::vector<CodeObject*> codeObjects;
     codeObjects.reserve(codeObjectCount);
 
-    // Deserialize each CodeObject.
     for (size_t i = 0; i < codeObjectCount; ++i)
     {
-        auto name = readString(file);
-        auto code = readVector(file);
-        auto constants = readVectorConstants(file);
-
-        auto* codeObject = new CodeObject(name);
-        codeObject->code = std::move(code);
-        codeObject->constants = std::move(constants);
-
-        codeObjects.push_back(codeObject);
+        codeObjects.push_back(readCodeObject(file));
     }
 
     Global global;
     size_t globalCount;
     file.read(reinterpret_cast<char*>(&globalCount), sizeof(globalCount));
 
-    // Deserialize global variables.
     for (size_t i = 0; i < globalCount; ++i)
     {
         auto name = readString(file);

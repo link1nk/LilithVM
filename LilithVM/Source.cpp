@@ -1,43 +1,33 @@
 #include "vm/LilithVM.h"
+#include "bytecode/LilithFile.h"
 #include <iostream>
 
 int main(void)
 {
 	LilithVM llvm;
 
-	llvm.compiler->setVariable("i", 10);
-	llvm.compiler->setVariable("count", 0);
-
-	llvm.compiler->initWhile();
-	llvm.compiler->accessVariable("i");
-	llvm.compiler->accessVariable("count");
-	llvm.compiler->setWhileCondition(">");
-
+	/*
+	llvm.compiler->setVariable("x", 5);
+		
 	llvm.compiler->startBlock();
-	
-	llvm.compiler->accessVariable("i");
-	llvm.compiler->loadConst(1);
-	llvm.compiler->loadInstruction(OP_SUB);
-	llvm.compiler->updateVariable("i");
-
-	llvm.compiler->accessVariable("count");
-	llvm.compiler->loadConst(1);
-	llvm.compiler->loadInstruction(OP_ADD);
-	llvm.compiler->updateVariable("count");
-
+	llvm.compiler->setVariable("x", 10);
 	llvm.compiler->endBlock();
 
-	llvm.compiler->endWhile();
+	llvm.compiler->startBlock();
+	llvm.compiler->setVariable("x", 10);
+	llvm.compiler->endBlock();
 
-	llvm.compiler->accessVariable("count");
+	llvm.compiler->accessVariable("x");
 
-	//llvm.compiler->compile("execute.llt");
+	llvm.compiler->compile("execute.llt");
+	*/
 
-	auto result = llvm.exec(llvm.compiler->compile());
+	auto result = llvm.execFromFile("execute.llt");
 
 	std::cout << std::endl;
 
 	log(result);
+
 
 	return 0;
 }

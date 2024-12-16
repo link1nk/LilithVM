@@ -143,6 +143,7 @@ size_t LilithDisassembler::disassembleLocal(CodeObject* co, uint8_t opcode, size
 
 	auto localIndex = co->code[offset + 1];
 
+	/*
 	std::string localName = co->locals[localIndex].name;
 
 	if (localName.rfind("DELETED", 0) == 0)
@@ -155,6 +156,9 @@ size_t LilithDisassembler::disassembleLocal(CodeObject* co, uint8_t opcode, size
 	{
 		std::cout << (int)localIndex << " (" << localName << ")";
 	}
+	*/
+
+	std::cout << (int)localIndex;
 
 	return offset + 2;
 }

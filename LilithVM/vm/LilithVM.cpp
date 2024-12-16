@@ -235,11 +235,6 @@ LilithValue LilithVM::eval()
 
 			popN(count);
 
-			while (sp != bp)
-			{
-				pop();
-			}
-
 			break;
 		}
 
@@ -301,7 +296,7 @@ void LilithVM::setGlobalVariables()
 
 void LilithVM::dumpStack()
 {
-	std::cout << "\n---------------------- Stack ----------------------\n";
+	std::cout << "\n------------------------- Stack -------------------------\n";
 
 	if (sp == &stack[0])
 	{

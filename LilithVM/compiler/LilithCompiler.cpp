@@ -63,13 +63,10 @@ size_t LilithCompiler::getVarsCountOnScopeExit()
 
     if (co->locals.size() > 0)
     {
-        for (auto& e : co->locals)
+        while (!co->locals.empty() && co->locals.back().scopeLevel == co->scopeLevel)
         {
-            if (e.scopeLevel == co->scopeLevel)
-            {
-                co->locals.back().name = "DELETED" + co->locals.back().name;
-                varsCount++;
-            }
+            co->locals.pop_back();
+            varsCount++;
         }
     }
 
@@ -92,8 +89,6 @@ CodeObject* LilithCompiler::compile()
 
     emit(OP_HALT);
 
-    std::vector<CodeObject*> codes = { co };
-
     return co;
 }
 
@@ -103,9 +98,9 @@ CodeObject* LilithCompiler::compile(std::string file)
 
     std::vector<CodeObject*> codes = { co };
 
-    LilithFileWriter::writeToFile(file, codes, *global);
-
     endBlock();
+
+    LilithFileWriter::writeToFile(file, codes, *global);
 
     return co;
 }
@@ -232,8 +227,6 @@ void LilithCompiler::setVariable(const std::string& name, double value)
 
         emit(OP_SET_GLOBAL);
         emit(global->getGlobalIndex(name));
-
-        emit(OP_POP);
     }
     else
     {
@@ -254,8 +247,6 @@ void LilithCompiler::setVariable(const std::string& name, std::string value)
 
         emit(OP_SET_GLOBAL);
         emit(global->getGlobalIndex(name));
-
-        emit(OP_POP);
     }
     else
     {
@@ -286,8 +277,6 @@ void LilithCompiler::updateVariable(const std::string& name)
 
         emit(OP_SET_GLOBAL);
         emit(globalIndex);
-
-        emit(OP_POP);
     }
 }
 
@@ -313,8 +302,6 @@ void LilithCompiler::updateVariable(const std::string& name, double value)
 
         emit(OP_SET_GLOBAL);
         emit(globalIndex);
-
-        emit(OP_POP);
     }
 }
 
@@ -340,8 +327,6 @@ void LilithCompiler::updateVariable(const std::string& name, std::string value)
 
         emit(OP_SET_GLOBAL);
         emit(globalIndex);
-
-        emit(OP_POP);
     }
 }
 
