@@ -6,29 +6,25 @@ void LilithFileWriter::writeConstant(std::ofstream& file, const LilithValue& val
     file.write(reinterpret_cast<const char*>(&value.type), sizeof(value.type));
     switch (value.type)
     {
-    // Writes a numeric constant.
     case LilithValueType::NUMBER:
         file.write(reinterpret_cast<const char*>(&value.number), sizeof(value.number));
         break;
 
-    // Handles objects such as strings and code objects.
-    case LilithValueType::OBJECT: 
+    case LilithValueType::OBJECT:
     {
         ObjectType objectType = value.object->type;
         file.write(reinterpret_cast<const char*>(&objectType), sizeof(objectType));
 
         switch (objectType)
         {
-        // Serializes a string object.
-        case ObjectType::STRING: 
+        case ObjectType::STRING:
         {
             auto stringObject = static_cast<StringObject*>(value.object);
             writeString(file, stringObject->string);
         }
         break;
 
-        // Serializes a code object.
-        case ObjectType::CODE: 
+        case ObjectType::CODE:
         {
             auto codeObject = static_cast<CodeObject*>(value.object);
             writeString(file, codeObject->name);
@@ -36,12 +32,19 @@ void LilithFileWriter::writeConstant(std::ofstream& file, const LilithValue& val
             writeVectorConstants(file, codeObject->constants);
         }
         break;
+
+        case ObjectType::NATIVE:
+        {
+            writeString(file, "");
+            size_t arity = 0;
+            file.write(reinterpret_cast<const char*>(&arity), sizeof(arity)); 
+        }
+        break;
         }
     }
     break;
 
-    // Writes a boolean constant.
-    case LilithValueType::BOOLEAN: 
+    case LilithValueType::BOOLEAN:
         file.write(reinterpret_cast<const char*>(&value.boolean), sizeof(value.boolean));
         break;
     }
@@ -168,29 +171,25 @@ LilithValue LilithFileReader::readConstant(std::ifstream& file)
     file.read(reinterpret_cast<char*>(&value.type), sizeof(value.type));
     switch (value.type)
     {
-    // Reads a numeric constant.
-    case LilithValueType::NUMBER: 
+    case LilithValueType::NUMBER:
         file.read(reinterpret_cast<char*>(&value.number), sizeof(value.number));
         break;
 
-    // Reads an object (string or code).
-    case LilithValueType::OBJECT: 
+    case LilithValueType::OBJECT:
     {
         ObjectType objectType;
         file.read(reinterpret_cast<char*>(&objectType), sizeof(objectType));
 
         switch (objectType)
         {
-        // Reads a string object.
-        case ObjectType::STRING: 
+        case ObjectType::STRING:
         {
             auto str = readString(file);
             value.object = new StringObject(str);
         }
         break;
 
-        // Reads a code object.
-        case ObjectType::CODE: 
+        case ObjectType::CODE:
         {
             auto name = readString(file);
             auto code = readVector(file);
@@ -201,12 +200,21 @@ LilithValue LilithFileReader::readConstant(std::ifstream& file)
             value.object = codeObject;
         }
         break;
+
+        case ObjectType::NATIVE:
+        {
+            auto name = readString(file);
+            size_t arity = 0;
+            file.read(reinterpret_cast<char*>(&arity), sizeof(arity)); 
+
+            value.object = new NativeObject(name, arity);
+        }
+        break;
         }
     }
     break;
 
-    // Reads a boolean constant.
-    case LilithValueType::BOOLEAN: 
+    case LilithValueType::BOOLEAN:
         file.read(reinterpret_cast<char*>(&value.boolean), sizeof(value.boolean));
         break;
     }

@@ -48,7 +48,6 @@ void LilithCompiler::patchJumpAddress(size_t offset, uint32_t value)
 
 void LilithCompiler::writeByteAtOffset(size_t offset, uint8_t value)
 {
-    std::cout << "writing: " << offset << " value -> " << (int)value << '\n';
     co->code[offset] = value;
 }
 
@@ -337,7 +336,7 @@ void LilithCompiler::startBlock()
 
 void LilithCompiler::endBlock()
 {
-    auto varsCount = getVarsCountOnScopeExit();
+    auto varsCount = static_cast<uint8_t>(getVarsCountOnScopeExit());
 
     if (varsCount > 0)
     {
@@ -384,12 +383,10 @@ void LilithCompiler::endWhile()
     auto& block = whileStack.top();
 
     size_t jumpToStartOffset = getOffset(); 
-    patchJumpAddress(getOffset() - 4, block.loopStartAddr); 
-
-    std::cout << "here\n";
+    patchJumpAddress(getOffset() - 4, static_cast<uint32_t>(block.loopStartAddr));
 
     block.loopEndAddr = getOffset();
-    patchJumpAddress(block.loopEndJmpAddr, block.loopEndAddr); 
+    patchJumpAddress(block.loopEndJmpAddr, static_cast<uint32_t>(block.loopEndAddr));
 
     whileStack.pop(); 
 }
@@ -397,4 +394,32 @@ void LilithCompiler::endWhile()
 void LilithCompiler::loadInstruction(uint8_t opcode)
 {
     emit(opcode);
+}
+
+void LilithCompiler::nativeFunctionSquare(const std::string variable)
+{
+    emit(OP_GET_GLOBAL);
+    emit(global->getGlobalIndex("square"));
+
+    if (!global->exists(variable))
+    {
+        DIE << "[LilithCompiler]: Reference Error: " << variable;
+    }
+
+    emit(OP_GET_GLOBAL);
+    emit(global->getGlobalIndex(variable));
+
+    emit(OP_CALL);
+    emit(1);
+}
+
+void LilithCompiler::nativeFunctionSquare(double constant)
+{
+    emit(OP_GET_GLOBAL);
+    emit(global->getGlobalIndex("square"));
+
+    loadConst(constant);
+
+    emit(OP_CALL);
+    emit(1);
 }

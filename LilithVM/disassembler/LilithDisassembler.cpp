@@ -39,6 +39,7 @@ size_t LilithDisassembler::disassembleInstruction(CodeObject* co, size_t offset)
 	case OP_SET_LOCAL:
 		return disassembleLocal(co, opcode, offset);
 	case OP_SCOPE_EXIT:
+	case OP_CALL:
 		return disassembleWord(co, opcode, offset);
 	default:
 		DIE << "disassemblyInstruction: no disassembly for "

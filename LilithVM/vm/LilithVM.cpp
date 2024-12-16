@@ -1,6 +1,7 @@
 #include "LilithVM.h"
 #include "../compiler/LilithCompiler.h"
 #include <string>
+#include <algorithm>
 
 LilithVM::LilithVM() :
 	co(nullptr), ip(nullptr), sp(nullptr), bp(nullptr), stack({}), global(std::make_shared<Global>()), compiler(std::make_unique<LilithCompiler>(global))
@@ -39,6 +40,22 @@ LilithValue LilithVM::execFromFile(std::string file)
 
 	// Sets global variables
 	global = std::make_shared<Global>(std::move(loadedGlobal));
+
+	// Reassigning native functions
+	for (auto it = global->getGlobals().begin(); it != global->getGlobals().end();)
+	{
+		if (std::find(nativeFunctions.begin(), nativeFunctions.end(), (*it).name) != nativeFunctions.end())
+		{
+			it = global->getGlobals().erase(it);
+		}
+		else
+		{
+			it++;
+		}
+
+	}
+
+	setGlobalVariables();
 
 	// Initialize the stack
 	sp = &stack[0];
@@ -237,6 +254,31 @@ LilithValue LilithVM::eval()
 
 			break;
 		}
+		//---------------------------------------------------
+		// Function calls
+		//---------------------------------------------------
+		case OP_CALL:
+		{
+			auto argsCount = READ_BYTE();
+			auto fnValue = peek(argsCount);
+
+			// 1. Native Functions:
+
+			if (IS_NATIVE(fnValue))
+			{
+				AS_NATIVE(fnValue)->function();
+				auto result = pop();
+				popN(argsCount + 1);
+
+				push(result);
+
+				break;
+			}
+
+			// 2. User-defined function:
+
+			break;
+		}
 
 		default:
 		{
@@ -292,6 +334,27 @@ LilithValue LilithVM::peek(size_t offset)
 void LilithVM::setGlobalVariables()
 {
 	global->addConst("VERSION", 1);
+
+	global->addNativeFunction(
+		"square",
+		[&]() {
+			auto x = AS_NUMBER(peek(0));
+			push(NUMBER(x * x));
+		},
+		1
+	);
+	nativeFunctions.push_back("square");
+
+	global->addNativeFunction(
+		"sum",
+		[&]() {
+			auto v2 = AS_NUMBER(peek(0));
+			auto v1 = AS_NUMBER(peek(1));
+			push(NUMBER(v1 + v2));
+		},
+		2
+	);
+	nativeFunctions.push_back("sum");
 }
 
 void LilithVM::dumpStack()

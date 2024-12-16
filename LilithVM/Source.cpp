@@ -6,23 +6,12 @@ int main(void)
 {
 	LilithVM llvm;
 
-	/*
-	llvm.compiler->setVariable("x", 5);
-		
-	llvm.compiler->startBlock();
-	llvm.compiler->setVariable("x", 10);
-	llvm.compiler->endBlock();
+	llvm.compiler->nativeFunctionSquare("VERSION");
 
-	llvm.compiler->startBlock();
-	llvm.compiler->setVariable("x", 10);
-	llvm.compiler->endBlock();
-
-	llvm.compiler->accessVariable("x");
-
-	llvm.compiler->compile("execute.llt");
-	*/
-
+	CodeObject* co = llvm.compiler->compile("execute.llt");
 	auto result = llvm.execFromFile("execute.llt");
+
+	//auto result = llvm.exec(co);
 
 	std::cout << std::endl;
 

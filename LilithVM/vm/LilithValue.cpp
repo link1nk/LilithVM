@@ -19,6 +19,10 @@ std::string lilithValueToTypeString(const LilithValue& lilithValue)
 	{
 		return "CODE";
 	}
+	else if (IS_NATIVE(lilithValue))
+	{
+		return "NATIVE";
+	}
 	else
 	{
 		DIE << "lilithValueToTypeString: unknow type " << (int)lilithValue.type;
@@ -47,6 +51,11 @@ std::string lilithValueToConstantString(const LilithValue& lilithValue)
 	{
 		auto code = AS_CODE(lilithValue);
 		ss << "code " << code << ": " << code->name;
+	}
+	else if (IS_NATIVE(lilithValue))
+	{
+		auto fn = AS_NATIVE(lilithValue);
+		ss << fn->name << "/" << fn->arity;
 	}
 	else
 	{
@@ -85,3 +94,7 @@ void CodeObject::addLocal(const std::string& name)
 {
 	locals.push_back({ name, scopeLevel });
 }
+
+NativeObject::NativeObject(NativeFn function, const std::string& name, size_t arity) :
+	Object(ObjectType::NATIVE), function(function), name(name), arity(arity)
+{}

@@ -23,6 +23,7 @@ constexpr uint8_t OP_POP          { 0x0B };  // Pops a value from the stack
 constexpr uint8_t OP_GET_LOCAL    { 0x0C };  // Returns a local variable
 constexpr uint8_t OP_SET_LOCAL    { 0x0D };  // Sets a local variable value
 constexpr uint8_t OP_SCOPE_EXIT   { 0x0E };  // Exits scope
+constexpr uint8_t OP_CALL         { 0x0F };  // Function call
 
 #define OP_STR(op) \
 	case OP_##op:  \
@@ -47,6 +48,7 @@ static std::string opcodeToString(uint8_t opcode)
 		OP_STR(GET_LOCAL);
 		OP_STR(SET_LOCAL);
 		OP_STR(SCOPE_EXIT);
+		OP_STR(CALL);
 	default:
 		DIE << "opcodeToString: unknown opcode: " << std::hex << (int)opcode;
 	}

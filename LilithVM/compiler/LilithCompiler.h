@@ -91,6 +91,9 @@ public:
 	void setWhileCondition(const std::string& op);
 	void endWhile();
 	void loadInstruction(uint8_t opcode);
+	void nativeFunctionSquare(const std::string variable);
+	void nativeFunctionSquare(double constant);
+
 };
 
 #endif // Compiler_H
