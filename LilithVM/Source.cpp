@@ -6,10 +6,11 @@ int main(void)
 {
 	LilithVM llvm;
 
-	llvm.compiler->nativeFunctionSquare("VERSION");
+	llvm.compiler->setVariable("x", 10);
+	llvm.compiler->nativeFunctionSquare("x");
 
 	CodeObject* co = llvm.compiler->compile("execute.llt");
-	auto result = llvm.execFromFile("execute.llt");
+	auto result = llvm.exec("execute.llt");
 
 	//auto result = llvm.exec(co);
 

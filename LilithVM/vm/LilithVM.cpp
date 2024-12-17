@@ -3,6 +3,9 @@
 #include <string>
 #include <algorithm>
 
+std::vector<GlobalVar> LilithVM::savedState
+{};
+
 LilithVM::LilithVM() :
 	co(nullptr), ip(nullptr), sp(nullptr), bp(nullptr), stack({}), global(std::make_shared<Global>()), compiler(std::make_unique<LilithCompiler>(global))
 {
@@ -30,7 +33,7 @@ LilithValue LilithVM::exec(CodeObject* program)
 	return eval();
 }
 
-LilithValue LilithVM::execFromFile(std::string file)
+LilithValue LilithVM::exec(std::string file)
 {
 	// Loads the CodeObject and global variables
 	auto [codeObjects, loadedGlobal] = LilithFileReader::readFromFile(file);
@@ -44,7 +47,7 @@ LilithValue LilithVM::execFromFile(std::string file)
 	// Reassigning native functions
 	for (auto it = global->getGlobals().begin(); it != global->getGlobals().end();)
 	{
-		if (std::find(nativeFunctions.begin(), nativeFunctions.end(), (*it).name) != nativeFunctions.end())
+		if (std::find(nativeGlobals.begin(), nativeGlobals.end(), (*it).name) != nativeGlobals.end())
 		{
 			it = global->getGlobals().erase(it);
 		}
@@ -52,10 +55,16 @@ LilithValue LilithVM::execFromFile(std::string file)
 		{
 			it++;
 		}
-
 	}
 
-	setGlobalVariables();
+	std::vector<GlobalVar> temp = global->getGlobals();
+
+	global->getGlobals() = savedState;
+
+	for (auto e : temp)
+	{
+		global->getGlobals().push_back(e);
+	}
 
 	// Initialize the stack
 	sp = &stack[0];
@@ -334,6 +343,7 @@ LilithValue LilithVM::peek(size_t offset)
 void LilithVM::setGlobalVariables()
 {
 	global->addConst("VERSION", 1);
+	nativeGlobals.push_back("VERSION");
 
 	global->addNativeFunction(
 		"square",
@@ -343,7 +353,7 @@ void LilithVM::setGlobalVariables()
 		},
 		1
 	);
-	nativeFunctions.push_back("square");
+	nativeGlobals.push_back("square");
 
 	global->addNativeFunction(
 		"sum",
@@ -354,7 +364,9 @@ void LilithVM::setGlobalVariables()
 		},
 		2
 	);
-	nativeFunctions.push_back("sum");
+	nativeGlobals.push_back("sum");
+
+	savedState = global->getGlobals();
 }
 
 void LilithVM::dumpStack()

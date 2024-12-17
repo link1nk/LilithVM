@@ -92,7 +92,8 @@ private:
 	LilithValue* bp;                               // Base Pointer
 
 	std::shared_ptr<Global> global;                // Global object
-	std::vector<std::string> nativeFunctions;      // Native function names
+	std::vector<std::string> nativeGlobals;        // Native global names
+	static std::vector<GlobalVar> savedState;      // Globals initial state
 
 	LilithValue eval();                            // Main eval loop
 	void push(const LilithValue& value);           // Pushes a value onto the stack
@@ -109,7 +110,7 @@ public:
 	LilithVM();
 
 	LilithValue exec(CodeObject* program);         // Executes a program
-	LilithValue execFromFile(std::string program); // Executes a program from lilith bytecode file
+	LilithValue exec(std::string program);         // Executes a program from lilith bytecode file
 };
 
 #endif // LilithVM_H
